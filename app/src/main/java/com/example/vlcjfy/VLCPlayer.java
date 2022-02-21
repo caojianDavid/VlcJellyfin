@@ -149,17 +149,24 @@ public class VLCPlayer extends VLCVideoLayout implements MediaController.MediaPl
 
     @Override
     public void start() {
-        mMediaPlayer.play();
+        if(mMediaPlayer != null) {
+            mMediaPlayer.play();
+        }
     }
 
     @Override
     public void pause() {
-        mMediaPlayer.pause();
+        if(mMediaPlayer != null) {
+            mMediaPlayer.pause();
+        }
     }
 
     @Override
     public int getDuration() {
-        return (int)mMediaPlayer.getLength();
+        if(mMediaPlayer != null) {
+            return (int) mMediaPlayer.getLength();
+        }
+        return 0;
     }
 
     @Override
@@ -250,10 +257,28 @@ public class VLCPlayer extends VLCVideoLayout implements MediaController.MediaPl
     }
 
     public MediaPlayer.TrackDescription[] getAudioTracks(){
-        return mMediaPlayer.getAudioTracks();
+        if(mMediaPlayer != null) {
+            return mMediaPlayer.getAudioTracks();
+        }
+        return null;
+    }
+
+    public void setAudioTrack(int i){
+        if(mMediaPlayer != null){
+            mMediaPlayer.setAudioTrack(i);
+        }
     }
 
     public MediaPlayer.TrackDescription[] getSpuTracks(){
-        return mMediaPlayer.getSpuTracks();
+        if(mMediaPlayer != null) {
+            return mMediaPlayer.getSpuTracks();
+        }
+        return null;
+    }
+
+    public void setSpuTrack(int i){
+        if(mMediaPlayer != null){
+            mMediaPlayer.setSpuTrack(i);
+        }
     }
 }

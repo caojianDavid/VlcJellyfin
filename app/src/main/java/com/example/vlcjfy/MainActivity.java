@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
         ViewGroup ParentView = (ViewGroup) this.getWindow().getDecorView();
         player = new VLCPlayer(this);
-        player.setMedia(url2);
+        player.setMedia(url);
         player.setIVLCPlayer(new IVLCPlayer() {
             @Override
             public void onPlayEnd() {
@@ -67,8 +67,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         Log.d(TAG, "播放器按键按下：" + keyCode);
-        int currPostion = player.getCurrentPosition();
         if (player != null) {
+            int currPostion = player.getCurrentPosition();
             if(!Controller.isShowing()){
                 switch (keyCode){
                     case KeyEvent.KEYCODE_DPAD_UP:

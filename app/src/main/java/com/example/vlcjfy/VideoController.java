@@ -26,6 +26,7 @@ import org.videolan.libvlc.LibVLC;
 import org.videolan.libvlc.MediaPlayer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Formatter;
 import java.util.Locale;
 
@@ -36,11 +37,11 @@ public class VideoController implements SeekBar.OnSeekBarChangeListener, View.On
     private boolean mShowing = false;
     private VLCPlayer player;
     private View ControllerView;
-    private String[] Aspects = {"1:1", "4:3", "16:9", "16:10", "221:100","5:4"};
-    private float[] rates = {0.5f,1.0f,1.5f,2.0f,2.5f,3.0f};
+    private String[] Aspects = {"1:1", "4:3", "16:9", "16:10", "221:100", "5:4"};
+    private Float[] rates = {0.5f, 1.0f, 1.5f, 2.0f, 2.5f, 3.0f};
     private static final int FADE_OUT = 1;
     private static final int SHOW_PROGRESS = 2;
-    private static final int sDefaultTimeout = 5000;
+    private static final int sDefaultTimeout = 10000;
 
     private LinearLayout subtitleView;
     private LinearLayout layout_bottom;
@@ -118,7 +119,7 @@ public class VideoController implements SeekBar.OnSeekBarChangeListener, View.On
         setListener();
     }
 
-    public void setPlayer(VLCPlayer player){
+    public void setPlayer(VLCPlayer player) {
         this.player = player;
     }
 
@@ -194,42 +195,66 @@ public class VideoController implements SeekBar.OnSeekBarChangeListener, View.On
         return mShowing;
     }
 
-    public void ShowPopupMenu(View pview, ArrayList list){
-        
-    }
-
-    public void showTrackWindow(View view, int Type) {
+    // type 1:播放速率，2:宽高比
+    public void showPopupMenu(View pview, ArrayList list, int type) {
         PopupMenu popupMenu = null;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-            popupMenu = new PopupMenu(this.ControllerView.getContext(), view, Gravity.CENTER);
+            popupMenu = new PopupMenu(this.ControllerView.getContext(), pview, Gravity.CENTER);
+        } else {
+            popupMenu = new PopupMenu(this.ControllerView.getContext(), pview);
         }
-        if (player != null) { // 判断播放器
+        for (int i = 0; i < list.size(); i++) {
+            popupMenu.getMenu().add(type, i,i, String.valueOf(list.get(i)));
+        }
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                int itemid = menuItem.getItemId();
+                int type = menuItem.getGroupId();
+                Log.d(TAG, "onMenuItemClick: " + itemid + ":" + type);
+                if (type == 1) {
+                    Float rate = rates[itemid];
+                    player.setSpeed(rate);
+                    tv_speed.setText(String.valueOf(rate));
+                } else if (type == 2) {
+                    String aspect = Aspects[itemid];
+                    player.setAspect(aspect);
+                    tv_aspect.setText(aspect);
+                }
+                return true;
+            }
+        });
+        popupMenu.show();
+    }
 
-//            ITrackInfo[] mIjkTrackInfo = player.getTrackInfo(); //这里可以获得所有的轨道信息
-//            for (int i = 0; i < mIjkTrackInfo.length; i++) {
-//                ITrackInfo trackInfo = mIjkTrackInfo[i];
-//                Log.d(TAG, "showTrackWindow: 轨：" + trackInfo.getInfoInline());
-//                if(trackInfo.getTrackType() == Type){
-//                    popupMenu.getMenu().add(Menu.NONE,i,i,trackInfo.getInfoInline());
-//                }
-//                if (trackInfo.getTrackType() == ITrackInfo.MEDIA_TRACK_TYPE_AUDIO) { //判断是否是音轨信息
-//
-//                } else if (trackInfo.getTrackType() == ITrackInfo.MEDIA_TRACK_TYPE_TIMEDTEXT) { //判断是否是内嵌字幕信息
-//                    Log.d("checkSubTitle: ", trackInfo.getInfoInline());
-//                }
-//            }
+    // type 3:音轨，4：字幕
+    public void showPopupMenu(View pview, MediaPlayer.TrackDescription[] tracks, int type) {
+        if(tracks == null) return;
+        PopupMenu popupMenu = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+            popupMenu = new PopupMenu(this.ControllerView.getContext(), pview, Gravity.CENTER);
+        } else {
+            popupMenu = new PopupMenu(this.ControllerView.getContext(), pview);
         }
-//        if(popupMenu  != null){
-//            popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-//                @Override
-//                public boolean onMenuItemClick(MenuItem menuItem) {
-//                    player.setTrackStream(menuItem.getItemId());
-//                    Log.d(TAG, "onMenuItemClick: 设置轨道：" + menuItem.getTitle() + " ID: " + menuItem.getItemId());
-//                    return true;
-//                }
-//            });
-//            popupMenu.show();
-//        }
+        for (int i = 0; i < tracks.length; i++) {
+            MediaPlayer.TrackDescription track = tracks[i];
+            popupMenu.getMenu().add(type, track.id,i, track.name);
+        }
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                int itemid = menuItem.getItemId();
+                int type = menuItem.getGroupId();
+                Log.d(TAG, "onMenuItemClick: " + itemid + ":" + type);
+                if (type == 3) {
+                    player.setAudioTrack(itemid);
+                } else if (type == 4) {
+                    player.setSpuTrack(itemid);
+                }
+                return true;
+            }
+        });
+        popupMenu.show();
     }
 
     public void showSubTitle(String text) {
@@ -255,11 +280,11 @@ public class VideoController implements SeekBar.OnSeekBarChangeListener, View.On
         }
     }
 
-    public void play(){
-        if(player.isPlaying()){
+    public void play() {
+        if (player.isPlaying()) {
             player.pause();
             playerStateChanged(STATE_PAUSE);
-        }else{
+        } else {
             player.start();
             playerStateChanged(STATE_PAUSE);
         }
@@ -275,14 +300,18 @@ public class VideoController implements SeekBar.OnSeekBarChangeListener, View.On
                 player.stop();
                 break;
             case R.id.tv_subtrack:
+                showPopupMenu(view, player.getSpuTracks(),4);
                 //showTrackWindow(view,IjkTrackInfo.MEDIA_TRACK_TYPE_TIMEDTEXT);
                 break;
             case R.id.tv_audiotrack:
+                showPopupMenu(view, player.getAudioTracks(),3);
                 //showTrackWindow(view,IjkTrackInfo.MEDIA_TRACK_TYPE_AUDIO);
                 break;
             case R.id.tv_aspect:
+                showPopupMenu(view,new ArrayList<String>(Arrays.asList(Aspects)),2);
                 break;
             case R.id.tv_speed:
+                showPopupMenu(view,new ArrayList<Float>(Arrays.asList(rates)),1);
                 setSpeed();
                 break;
         }
