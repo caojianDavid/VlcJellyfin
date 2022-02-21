@@ -25,6 +25,7 @@ import android.widget.TextView;
 import org.videolan.libvlc.LibVLC;
 import org.videolan.libvlc.MediaPlayer;
 
+import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.Locale;
 
@@ -35,7 +36,8 @@ public class VideoController implements SeekBar.OnSeekBarChangeListener, View.On
     private boolean mShowing = false;
     private VLCPlayer player;
     private View ControllerView;
-
+    private String[] Aspects = {"1:1", "4:3", "16:9", "16:10", "221:100","5:4"};
+    private float[] rates = {0.5f,1.0f,1.5f,2.0f,2.5f,3.0f};
     private static final int FADE_OUT = 1;
     private static final int SHOW_PROGRESS = 2;
     private static final int sDefaultTimeout = 5000;
@@ -192,6 +194,10 @@ public class VideoController implements SeekBar.OnSeekBarChangeListener, View.On
         return mShowing;
     }
 
+    public void ShowPopupMenu(View pview, ArrayList list){
+        
+    }
+
     public void showTrackWindow(View view, int Type) {
         PopupMenu popupMenu = null;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
@@ -249,14 +255,24 @@ public class VideoController implements SeekBar.OnSeekBarChangeListener, View.On
         }
     }
 
+    public void play(){
+        if(player.isPlaying()){
+            player.pause();
+            playerStateChanged(STATE_PAUSE);
+        }else{
+            player.start();
+            playerStateChanged(STATE_PAUSE);
+        }
+    }
+
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.play_pause:
-                player.start();
+                play();
                 break;
             case R.id.tv_stop:
-                player.onKeyDown(KeyEvent.KEYCODE_BACK, new KeyEvent(KeyEvent.KEYCODE_BACK, KeyEvent.ACTION_DOWN));
+                player.stop();
                 break;
             case R.id.tv_subtrack:
                 //showTrackWindow(view,IjkTrackInfo.MEDIA_TRACK_TYPE_TIMEDTEXT);

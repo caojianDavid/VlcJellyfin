@@ -237,8 +237,16 @@ public class VLCPlayer extends VLCVideoLayout implements MediaController.MediaPl
         }
     }
 
-    public void setSpeed(float s){
-        //
+    public void setAspect(String aspect){
+        if(mMediaPlayer != null){
+            mMediaPlayer.setAspectRatio(aspect);
+        }
+    }
+
+    public void setSpeed(float v){
+        if(mMediaPlayer != null){
+            mMediaPlayer.setRate(v);
+        }
     }
 
     public MediaPlayer.TrackDescription[] getAudioTracks(){
