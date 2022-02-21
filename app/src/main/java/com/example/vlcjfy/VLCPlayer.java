@@ -94,15 +94,18 @@ public class VLCPlayer extends VLCVideoLayout implements MediaController.MediaPl
                         Log.d(TAG, "onEvent: 媒体打开");
                         break;
                     case MediaPlayer.Event.Buffering: //媒体加载public float getBuffering() 获取加载视频流的进度0-100
-                        Log.d(TAG, "onEvent: 媒体加载");
                         Buffering = (int) event.getBuffering();
+                        Log.d(TAG, "onEvent: 加载中" + Buffering);
+                        Controller.showLoading(Buffering);
                         break;
                     case MediaPlayer.Event.Playing: //媒体打开成功
-                        Log.d(TAG, "onEvent:媒体打开成功 ");
-                        Controller.show();
+                        Log.d(TAG, "onEvent: 媒体打开成功");
+                        Controller.hide();
+                        Controller.hidePauseImage();
                         break;
                     case MediaPlayer.Event.Paused://媒体暂停
                         Log.d(TAG, "onEvent: 媒体暂停");
+                        Controller.showPauseImage();
                         break;
                     case MediaPlayer.Event.Stopped://媒体结束、中断
                         Log.d(TAG, "onEvent: 媒体结束、中断Stopped");
@@ -117,17 +120,14 @@ public class VLCPlayer extends VLCVideoLayout implements MediaController.MediaPl
                         Log.d(TAG, "onEvent: 媒体播放错误");
                         break;
                     case MediaPlayer.Event.TimeChanged://视频时间变化
-                        Log.d(TAG, "onEvent: 视频时间变化" + event.getTimeChanged());
                         // public long getTimeChanged(); 获取当前播放视频的时间
                         // public native long getLength();//获取视频总时间
                         CurrentPostion = (int) event.getTimeChanged();
                         break;
                     case MediaPlayer.Event.PositionChanged://视频总时长的百分比public float getPositionChanged()//获取当前视频总时长的百分比0-1
                         //public native void setPosition(float var1);//让视频跳到指定位置
-                        Log.d(TAG, "onEvent: PositionChanged" + event.getPositionChanged());
                         break;
                     case MediaPlayer.Event.SeekableChanged:
-                        Log.d(TAG, "onEvent: SeekableChanged");
                         break;
                     case MediaPlayer.Event.PausableChanged:
                         Log.d(TAG, "onEvent: PausableChanged");
@@ -139,9 +139,17 @@ public class VLCPlayer extends VLCVideoLayout implements MediaController.MediaPl
                         Log.d(TAG, "onEvent: Vout");
                         break;
                     case MediaPlayer.Event.ESAdded:
+                        Log.d(TAG, "onEvent: ESAdded");
+                        break;
                     case MediaPlayer.Event.ESDeleted:
+                        Log.d(TAG, "onEvent: ESDeleted");
+                        break;
                     case MediaPlayer.Event.ESSelected:
+                        Log.d(TAG, "onEvent: ESSelected");
+                        break;
                     case MediaPlayer.Event.RecordChanged:
+                        Log.d(TAG, "onEvent: RecordChanged");
+                        break;
                 }
             }
         });
@@ -241,6 +249,7 @@ public class VLCPlayer extends VLCVideoLayout implements MediaController.MediaPl
     public void release(){
         if(mMediaPlayer != null){
             mMediaPlayer.release();
+            mLibVLC.release();
         }
     }
 

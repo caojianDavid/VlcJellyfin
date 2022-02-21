@@ -15,53 +15,115 @@ import org.videolan.libvlc.Media;
 import org.videolan.libvlc.MediaPlayer;
 import org.videolan.libvlc.media.VideoView;
 import org.videolan.libvlc.util.VLCVideoLayout;
+import org.xwalk.core.JavascriptInterface;
+import org.xwalk.core.XWalkActivity;
+import org.xwalk.core.XWalkPreferences;
+import org.xwalk.core.XWalkResourceClient;
+import org.xwalk.core.XWalkSettings;
+import org.xwalk.core.XWalkView;
+import org.xwalk.core.XWalkWebResourceRequest;
+import org.xwalk.core.XWalkWebResourceResponse;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
-    private String TAG = "MainActivity";
+public class MainActivity extends XWalkActivity {
+    private String TAG = "XWalkActivity";
+    private myXWalkView xwalkView;
     private VLCPlayer player;
     private VideoController Controller;
+
+    @Override
+    protected void onXWalkReady() {
+        xwalkView.setResourceClient(new XWalkResourceClient(xwalkView) {
+            @Override
+            public XWalkWebResourceResponse shouldInterceptLoadRequest(XWalkView view, XWalkWebResourceRequest request) {
+                return super.shouldInterceptLoadRequest(view, request);
+            }
+        });
+        XWalkSettings settings = xwalkView.getSettings();
+        settings.setDomStorageEnabled(true);
+        settings.setCacheMode(XWalkSettings.LOAD_NO_CACHE);
+        settings.setAllowFileAccess(true);
+        settings.setDatabaseEnabled(true);
+        settings.setJavaScriptEnabled(true);
+        settings.setDomStorageEnabled(true);
+        settings.setAllowContentAccess(true);
+        settings.setAllowFileAccessFromFileURLs(true);
+        settings.setAllowUniversalAccessFromFileURLs(true);
+
+        xwalkView.addJavascriptInterface(new VLCCallBack(), "NativeInterface");
+        String url = "file:///android_asset/frontend/index.html";
+        xwalkView.loadUrl(url);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        String url = "https://cc.noqazx.cyou:33380/jyf/videos/5058a9ea-e4cc-2563-ff7d-2d4a798fc37a/stream.mp4?static=true";
-        String url2 = "https://stream7.iqilu.com/10339/upload_transcode/202002/18/20200218114723HDu3hhxqIT.mp4";
-
-        ViewGroup ParentView = (ViewGroup) this.getWindow().getDecorView();
-        player = new VLCPlayer(this);
-        player.setMedia(url);
-        player.setIVLCPlayer(new IVLCPlayer() {
-            @Override
-            public void onPlayEnd() {
-                ViewGroup vg = (ViewGroup) player.getParent();
-                if(vg != null){
-                    player.release();
-                    vg.removeView(player);
-                    player = null;
-                }
-            }
-        });
-
-        FrameLayout.LayoutParams ll = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,FrameLayout.LayoutParams.MATCH_PARENT);
-        ParentView.addView(player,ll);
-        //player.requestFocus();
-        Controller = new VideoController(ParentView);
-        Controller.setPlayer(player);
-        player.setController(Controller);
-        player.start();
+        xwalkView = findViewById(R.id.xwalkview);
+        // turn on debugging
+        //XWalkPreferences.setValue(XWalkPreferences.REMOTE_DEBUGGING, true);
     }
 
-    @Override
-    public void onBackPressed() {
-        if(player != null){
-            player.stop();
-            return;
+//    @Override
+//    public void onBackPressed() {
+//        if(player != null){
+//            player.stop();
+//            return;
+//        }
+//        super.onBackPressed();
+//    }
+
+    public class VLCCallBack {
+
+        @JavascriptInterface
+        public void toPlay(String videoUrl) {
+            runOnUiThread(() -> {
+                FrameLayout ParentView = ((FrameLayout) findViewById(R.id.paview));
+                player = new VLCPlayer(getApplicationContext());
+                player.setMedia(videoUrl);
+                player.setIVLCPlayer(new IVLCPlayer() {
+                    @Override
+                    public void onPlayEnd() {
+                        ViewGroup vg = (ViewGroup) player.getParent();
+                        if(vg != null){
+                            Controller = null;
+                            player.release();
+                            ParentView.removeView(player);
+                            player = null;
+                            xwalkView.setVisibility(View.VISIBLE);
+                        }
+                    }
+                });
+
+                FrameLayout.LayoutParams ll = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,FrameLayout.LayoutParams.MATCH_PARENT);
+                ParentView.addView(player,ll);
+                //player.requestFocus();
+                Controller = new VideoController(ParentView);
+                Controller.setPlayer(player);
+                player.setController(Controller);
+                player.start();
+
+                xwalkView.setVisibility(View.GONE);
+            });
         }
-        super.onBackPressed();
+
+        @JavascriptInterface
+        public void appExit() {
+            Log.d(TAG, "appExit: 退出APP");
+            if(player != null) player.release();
+            System.exit(0);
+        }
+
+        @JavascriptInterface
+        public String getPostion() {
+            if (player != null) {
+                return String.valueOf(player.getCurrentPosition());
+            } else {
+                return "0";
+            }
+        }
     }
 
     @Override
@@ -83,12 +145,12 @@ public class MainActivity extends AppCompatActivity {
                         return true;
                     case KeyEvent.KEYCODE_ENTER:
                     case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-                        player.start();
+                        Controller.play();
                         return true;
                     case KeyEvent.KEYCODE_ESCAPE:
                     case KeyEvent.KEYCODE_BACK:
-                        player.stop();
-                        return false;
+                        Controller.stop();
+                        return true;
                 }
             }else{
                 switch (keyCode){
@@ -96,12 +158,20 @@ public class MainActivity extends AppCompatActivity {
                     case KeyEvent.KEYCODE_BACK:
                         Controller.hide();
                         return true;
-                    default:
-                        return super.onKeyDown(keyCode, event);
                 }
+            }
+            return super.onKeyDown(keyCode, event);
+        }else {
+            switch (keyCode){
+                case KeyEvent.KEYCODE_ESCAPE:
+                case KeyEvent.KEYCODE_BACK:
+                    if(xwalkView.getVisibility() == View.VISIBLE){
+                        xwalkView.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ESCAPE));
+                    }
+                    return true;
             }
             return true;
         }
-        return super.onKeyDown(keyCode, event);
+        //return super.onKeyDown(keyCode, event);
     }
 }

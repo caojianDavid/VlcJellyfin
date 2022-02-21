@@ -19,6 +19,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
+import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -43,11 +44,12 @@ public class VideoController implements SeekBar.OnSeekBarChangeListener, View.On
     private static final int SHOW_PROGRESS = 2;
     private static final int sDefaultTimeout = 10000;
 
-    private LinearLayout subtitleView;
     private LinearLayout layout_bottom;
     private ImageView mPauseBtn, mSubtitleBtn, mAudioBtn, mStopBtn;
     private TextView tv_aspect, tv_speed;
     private SeekBar seekBar;
+    private ProgressBar loadingBar;
+    private ImageView pauseImage;
     private TextView mEndTime, mCurrentTime;
     private StringBuilder mFormatBuilder;
     private Formatter mFormatter;
@@ -93,7 +95,6 @@ public class VideoController implements SeekBar.OnSeekBarChangeListener, View.On
         ParentView.addView(ControllerView, layoutParams);
         //ControllerView.setVisibility(GONE);
 
-        subtitleView = ControllerView.findViewById(R.id.subtitleView);
         layout_bottom = ControllerView.findViewById(R.id.layout_bottom);
         mStopBtn = ControllerView.findViewById(R.id.tv_stop);
         mPauseBtn = ControllerView.findViewById(R.id.play_pause);
@@ -102,6 +103,8 @@ public class VideoController implements SeekBar.OnSeekBarChangeListener, View.On
         tv_aspect = ControllerView.findViewById(R.id.tv_aspect);
         tv_speed = ControllerView.findViewById(R.id.tv_speed);
         seekBar = ControllerView.findViewById(R.id.bottom_seek_progress);
+        loadingBar = ControllerView.findViewById(R.id.pb_loading);
+        pauseImage = ControllerView.findViewById(R.id.pauseImage);
         seekBar.setMax(1000);
         mEndTime = ControllerView.findViewById(R.id.total);
         mCurrentTime = ControllerView.findViewById(R.id.current);
@@ -257,37 +260,38 @@ public class VideoController implements SeekBar.OnSeekBarChangeListener, View.On
         popupMenu.show();
     }
 
-    public void showSubTitle(String text) {
-        TextView textView = new TextView(subtitleView.getContext());
-        LinearLayout.LayoutParams tll = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT, Gravity.CENTER);
-        textView.setLayoutParams(tll);
-        textView.setTextColor(player.getResources().getColor(R.color.white));
-        textView.setTextSize(32);
-        textView.setText(text);
-        subtitleView.removeAllViews();
-        subtitleView.addView(textView);
+    public void showLoading(int p){
+        if(p<100){
+            loadingBar.setVisibility(VISIBLE);
+            loadingBar.setProgress(p);
+        }else{
+            loadingBar.setVisibility(GONE);
+        }
     }
 
-    public void playerStateChanged(int state) {
-        switch (state) {
-            case STATE_PLAYING:
-                mPauseBtn.setImageDrawable(player.getResources().getDrawable(R.drawable.ic_baseline_pause_48));
-                break;
-            case STATE_PAUSE:
-                mPauseBtn.setImageDrawable(player.getResources().getDrawable(R.drawable.ic_baseline_play_arrow_48));
-                break;
-        }
+    public void showPauseImage(){
+        pauseImage.setVisibility(VISIBLE);
+        mPauseBtn.setImageDrawable(player.getResources().getDrawable(R.drawable.ic_baseline_play_arrow_48));
+    }
+
+    public void hidePauseImage(){
+        pauseImage.setVisibility(GONE);
+        mPauseBtn.setImageDrawable(player.getResources().getDrawable(R.drawable.ic_baseline_pause_48));
     }
 
     public void play() {
         if (player.isPlaying()) {
             player.pause();
-            playerStateChanged(STATE_PAUSE);
         } else {
             player.start();
-            playerStateChanged(STATE_PAUSE);
         }
+    }
+
+    public void stop(){
+        hide();
+        ParentView.removeView(ControllerView);
+        ControllerView = null;
+        player.stop();
     }
 
     @Override
@@ -297,7 +301,7 @@ public class VideoController implements SeekBar.OnSeekBarChangeListener, View.On
                 play();
                 break;
             case R.id.tv_stop:
-                player.stop();
+                stop();
                 break;
             case R.id.tv_subtrack:
                 showPopupMenu(view, player.getSpuTracks(),4);
