@@ -1,0 +1,1 @@
+Jellyfin androidTv客户端，集成Jellyfin-web和LIBVLC播放器。支持android4.2以上。
