@@ -87,8 +87,7 @@ public class VideoController implements SeekBar.OnSeekBarChangeListener, View.On
     private void CreateController() {
         FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                Gravity.BOTTOM
+                ViewGroup.LayoutParams.MATCH_PARENT
         );
         LayoutInflater inflate = (LayoutInflater) ParentView.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         ControllerView = inflate.inflate(R.layout.player_control_view, null);
