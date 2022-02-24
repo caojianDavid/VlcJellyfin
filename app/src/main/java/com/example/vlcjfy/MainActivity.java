@@ -43,6 +43,19 @@ public class MainActivity extends XWalkActivity {
         xwalkView.setResourceClient(new XWalkResourceClient(xwalkView) {
             @Override
             public XWalkWebResourceResponse shouldInterceptLoadRequest(XWalkView view, XWalkWebResourceRequest request) {
+//                Uri uri = request.getUrl();
+//                String path = uri.getPath();
+//                //Log.d(TAG, "shouldInterceptLoadRequest: console :" + path);
+//                if(path.endsWith("VlcPlayerPlugin.js")){
+//                    InputStream is = null;
+//                    try {
+//                        is = getAssets().open("frontend/js/extplayer.js");
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+//                    XWalkWebResourceResponse xwrr = createXWalkWebResourceResponse("text/javascript","UTF-8",is);
+//                    return xwrr;
+//                }
                 return super.shouldInterceptLoadRequest(view, request);
             }
         });
