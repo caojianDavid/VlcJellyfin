@@ -2,8 +2,6 @@ function VlcPlayerPlugin() {
 
     var self = this;
 
-    window.VlcPlayer = this;
-
     self.name = 'Vlc Player';
     self.type = 'mediaplayer';
     self.id = 'vlcplayer';
@@ -40,6 +38,7 @@ function VlcPlayerPlugin() {
     };
 
     self.play = function (options) {
+        window.VlcPlayer = this;
         return new Promise(function (resolve) {
             self._currentTime = (options.playerStartPositionTicks || 0) / 10000;
             self._paused = false;

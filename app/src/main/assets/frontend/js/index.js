@@ -558,7 +558,7 @@ window.addEventListener('message', function (msg) {
             contentFrame.src = '';
             break;
         case 'AppHost.exit':
-            window.NativeInterface.appExit();
+            window.ExternalPlayer.appExit();
             break;
     }
 });

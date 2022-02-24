@@ -38,19 +38,6 @@ public class MainActivity extends XWalkActivity {
     private VLCPlayer player;
     private VideoController Controller;
 
-    private Handler handler = new Handler() {
-        @Override
-        public void handleMessage(@NonNull Message msg) {
-            if (msg.what == 0) {
-                if (xwalkView != null) {
-                    Log.d(TAG, "handleMessage: 结束事件");
-                    xwalkView.loadUrl("javascript:window.VlcPlayer.notifyCanceled()");
-                }
-            }
-            //super.handleMessage(msg);
-        }
-    };
-
     @Override
     protected void onXWalkReady() {
         xwalkView.setResourceClient(new XWalkResourceClient(xwalkView) {
@@ -126,9 +113,7 @@ public class MainActivity extends XWalkActivity {
                             ParentView.removeView(player);
                             player = null;
                             xwalkView.setVisibility(View.VISIBLE);
-//                            Message msg = new Message();
-//                            msg.what = 0;
-//                            handler.handleMessage(msg);
+                            xwalkView.evaluateJavascript("javascript:window.VlcPlayer.notifyCanceled()",null);
                         }
                     });
 
