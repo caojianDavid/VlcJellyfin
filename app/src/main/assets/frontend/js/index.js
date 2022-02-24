@@ -369,6 +369,7 @@ function getTextToInject(success, failure) {
         bundle['player'] = data;
     }, failure);
 
+    success(bundle);
     // imitate promises as they're borked in at least WebOS 2
     // var looper = function (idx) {
     //     if (idx >= urls.length) {
