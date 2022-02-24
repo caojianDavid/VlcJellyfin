@@ -106,7 +106,7 @@ public class MainActivity extends XWalkActivity {
                     ParentView.removeView(player);
                     player = null;
                     xwalkView.setVisibility(View.VISIBLE);
-                    xwalkView.evaluateJavascript("javascript:window.VlcPlayer.notifyCanceled()",null);
+                    xwalkView.loadUrl("javascript:window.VlcPlayer.notifyCanceled()");
                 }
             });
 
