@@ -45,7 +45,8 @@ function VlcPlayerPlugin() {
             self._paused = false;
             self._currentSrc = options.url;
             console.log('开始播放：' + options.url);
-            window.ExternalPlayer.initPlayer(JSON.stringify(options));
+            //window.ExternalPlayer.initPlayer(JSON.stringify(options));
+            window.ExternalPlayer.toPlay(options.url);
             resolve();
             //this.loading.hide();
         });

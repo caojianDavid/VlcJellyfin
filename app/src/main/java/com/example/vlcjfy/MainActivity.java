@@ -1,15 +1,19 @@
 package com.example.vlcjfy;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import org.chromium.mojo.system.Handle;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.videolan.libvlc.LibVLC;
@@ -33,6 +37,19 @@ public class MainActivity extends XWalkActivity {
     private myXWalkView xwalkView;
     private VLCPlayer player;
     private VideoController Controller;
+
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            if (msg.what == 0) {
+                if (xwalkView != null) {
+                    Log.d(TAG, "handleMessage: 结束事件");
+                    xwalkView.loadUrl("javascript:window.VlcPlayer.notifyCanceled()");
+                }
+            }
+            //super.handleMessage(msg);
+        }
+    };
 
     @Override
     protected void onXWalkReady() {
@@ -95,29 +112,36 @@ public class MainActivity extends XWalkActivity {
 
         @JavascriptInterface
         public void toPlay(String videoUrl) {
-            FrameLayout ParentView = ((FrameLayout) findViewById(R.id.paview));
-            player = new VLCPlayer(getApplicationContext());
-            player.setMedia(videoUrl);
-            player.setIVLCPlayer(new IVLCPlayer() {
+            runOnUiThread(new Runnable() {
                 @Override
-                public void onPlayEnd() {
-                    Controller = null;
-                    player.release();
-                    ParentView.removeView(player);
-                    player = null;
-                    xwalkView.setVisibility(View.VISIBLE);
-                    xwalkView.loadUrl("javascript:window.VlcPlayer.notifyCanceled()");
+                public void run() {
+                    FrameLayout ParentView = ((FrameLayout) findViewById(R.id.paview));
+                    player = new VLCPlayer(getApplicationContext());
+                    player.setMedia(videoUrl);
+                    player.setIVLCPlayer(new IVLCPlayer() {
+                        @Override
+                        public void onPlayEnd() {
+                            Controller = null;
+                            player.release();
+                            ParentView.removeView(player);
+                            player = null;
+                            xwalkView.setVisibility(View.VISIBLE);
+//                            Message msg = new Message();
+//                            msg.what = 0;
+//                            handler.handleMessage(msg);
+                        }
+                    });
+
+                    FrameLayout.LayoutParams ll = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
+                    ParentView.addView(player, ll);
+                    Controller = new VideoController(ParentView);
+                    Controller.setPlayer(player);
+                    player.setController(Controller);
+                    player.start();
+
+                    xwalkView.setVisibility(View.GONE);
                 }
             });
-
-            FrameLayout.LayoutParams ll = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
-            ParentView.addView(player, ll);
-            Controller = new VideoController(ParentView);
-            Controller.setPlayer(player);
-            player.setController(Controller);
-            player.start();
-
-            xwalkView.setVisibility(View.GONE);
         }
 
         @JavascriptInterface
