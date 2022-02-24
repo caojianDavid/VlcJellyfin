@@ -2,7 +2,7 @@ function VlcPlayerPlugin() {
 
     var self = this;
 
-    window.ExtPlayer = this;
+    window.VlcPlayer = this;
 
     self.name = 'Vlc Player';
     self.type = 'mediaplayer';
@@ -45,7 +45,7 @@ function VlcPlayerPlugin() {
             self._paused = false;
             self._currentSrc = options.url;
             console.log('开始播放：' + options.url);
-            //window.ExternalPlayer.initPlayer(JSON.stringify(options));
+            window.ExternalPlayer.initPlayer(JSON.stringify(options));
             resolve();
             //this.loading.hide();
         });
@@ -70,8 +70,8 @@ function VlcPlayerPlugin() {
     };
 
     self.currentTime = function () {
-        return 0;
-        //return window.ExternalPlayer.getPostion() || 0 ;
+        self._currentTime = window.ExternalPlayer.getPostion() || self._currentTime ;
+        return self._currentTime * 1000;
         //return (self._currentTime || 0) * 1000;
     };
 
@@ -168,11 +168,11 @@ function VlcPlayerPlugin() {
             MusicStreamingTranscodingBitrate: 320000000,
             DirectPlayProfiles: [{ Type: 'Video' }, { Type: 'Audio' }],
             CodecProfiles: [],
-            TranscodingProfiles: [{
-                Container: 'mkv', Type: 'Video', AudioCodec: 'mp3,ac3,aac', VideoCodec: 'h264', Context: 'Streaming', MaxAudioChannels: '2'
-            }, {
-                Container: 'mp3', Type: 'Audio', AudioCodec: 'mp3', Context: 'Streaming', Protocol: 'http'
-            }],
+//            TranscodingProfiles: [{
+//                Container: 'mkv', Type: 'Video', AudioCodec: 'mp3,ac3,aac', VideoCodec: 'h264', Context: 'Streaming', MaxAudioChannels: '2'
+//            }, {
+//                Container: 'mp3', Type: 'Audio', AudioCodec: 'mp3', Context: 'Streaming', Protocol: 'http'
+//            }],
             SubtitleProfiles: [
                 { "Format": "srt", "Method": "External" },
                 { "Format": "srt", "Method": "Embed" },
