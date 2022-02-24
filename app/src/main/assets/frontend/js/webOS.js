@@ -35,136 +35,108 @@
         'multiserver'
     ];
 
-    class ijkplayer {
-        constructor() {
-            this.priority = -2;
-            this.name = 'IJK Player';
-            this.type = 'mediaplayer';
-            this.id = 'ijkplayer';
-            this.isLocalPlayer = true;
-        }
+    // class ijkplayer {
+    //     constructor() {
+    //         this.priority = -2;
+    //         this.name = 'IJK Player';
+    //         this.type = 'mediaplayer';
+    //         this.id = 'ijkplayer';
+    //         this.isLocalPlayer = true;
+    //     }
 
-        play(options) {
-            // Sanitize input
-            return new Promise(function (resolve, reject) {
-                var re = /^(http.*?)\?/;
-                var url = re.exec(options.url);
-                if (url) {
-                    if (url.length == 2) {
-                        var videoUrl = url[1] + '?static=true';
-                        window.NativeInterface.toPlay(videoUrl);
-                    } else {
-                        console.log('播放链接错误!');
-                    }
-                } else {
-                    console.log('没有获取到播放链接');
-                }
-                this.loading.hide();
-            });
-        }
+    //     play(options) {
+    //         // Sanitize input
+    //         return new Promise(function (resolve, reject) {
+    //             var re = /^(http.*?)\?/;
+    //             var url = re.exec(options.url);
+    //             if (url) {
+    //                 if (url.length == 2) {
+    //                     var videoUrl = url[1] + '?static=true';
+    //                     window.NativeInterface.toPlay(videoUrl);
+    //                 } else {
+    //                     console.log('播放链接错误!');
+    //                 }
+    //             } else {
+    //                 console.log('没有获取到播放链接');
+    //             }
+    //             this.loading.hide();
+    //         });
+    //     }
 
-        stop(destroyPlayer) {
-            return Promise.resolve();
-        }
+    //     stop(destroyPlayer) {
+    //         return Promise.resolve();
+    //     }
 
-        destroy() {
-            console.log('销毁destroy');
-        }
-        canPlayMediaType(mediaType) {
-            mediaType = (mediaType || '').toLowerCase();
-            return mediaType === 'audio' || mediaType === 'video';
-        }
+    //     destroy() {
+    //         console.log('销毁destroy');
+    //     }
+    //     canPlayMediaType(mediaType) {
+    //         mediaType = (mediaType || '').toLowerCase();
+    //         return mediaType === 'audio' || mediaType === 'video';
+    //     }
 
-        canPlayItem(item) {
-            // Does not play server items
-            return true;
-        }
+    //     canPlayItem(item) {
+    //         // Does not play server items
+    //         return true;
+    //     }
 
-        canPlayUrl(url) {
-            return true;
-        }
+    //     canPlayUrl(url) {
+    //         return true;
+    //     }
 
-        getDeviceProfile() {
-            return deviceprofile;
-        }
+    //     getDeviceProfile() {
+    //         return deviceprofile;
+    //     }
 
-        currentSrc() {
-            return '';
-        }
+    //     currentSrc() {
+    //         return '';
+    //     }
 
-        // Save this for when playback stops, because querying the time at that point might return 0
-        currentTime(val) {
-            if (val != null) {
-                window.NativeInterface.seekTo(val);
-                return;
-            } else {
-                var ct = 0;
-                ct = window.NativeInterface.getPostion();
-                return ct
-            }
-        }
+    //     // Save this for when playback stops, because querying the time at that point might return 0
+    //     currentTime(val) {
+    //         if (val != null) {
+    //             window.NativeInterface.seekTo(val);
+    //             return;
+    //         } else {
+    //             var ct = 0;
+    //             ct = window.NativeInterface.getPostion();
+    //             return ct
+    //         }
+    //     }
 
-        duration() {
-            return window.NativeInterface.getDuration();;
-        }
-        pause() {
+    //     duration() {
+    //         return window.NativeInterface.getDuration();;
+    //     }
+    //     pause() {
 
-        }
-        unpause() {
+    //     }
+    //     unpause() {
 
-        }
-        paused() {
-            return false;
-        }
-        volume(val) {
-            //             if (val != null) {
-            //                 return this.setVolume(val);
-            //             }
-            //             return this.getVolume();
-        }
+    //     }
+    //     paused() {
+    //         return false;
+    //     }
+    //     volume(val) {
+    //         //             if (val != null) {
+    //         //                 return this.setVolume(val);
+    //         //             }
+    //         //             return this.getVolume();
+    //     }
 
-        setMute(mute) {
+    //     setMute(mute) {
 
-        }
+    //     }
 
-        isMuted() {
+    //     isMuted() {
 
-        }
-    }
+    //     }
+    // }
 
-    var ijkplayerPlugin = new Promise(function (resolve) {
+    var vlcplayerPlugin = new Promise(function (resolve) {
         return resolve(function () {
-            return new ijkplayer();
+            return new VlcPlayerPlugin();
         });
     });
-
-    var deviceprofile = {
-        "Name": "Jellyfin for IJKPlayer",
-        "MaxStreamingBitrate": 90000000000,
-        "MaxStaticBitrate": 90000000000,
-        "MusicStreamingTranscodingBitrate": 1280000000,
-        "TimelineOffsetSeconds": 5,
-        "TranscodingProfiles": [],
-        "DirectPlayProfiles": [{ "Type": "Video",'container':'mp4' }, { "Type": "Audio" }, { "Type": "Photo" }],
-        "ResponseProfiles": [{'Type': 'Video', 'MimeType': 'video/mp4'}],
-        "ContainerProfiles": [],
-        "CodecProfiles": [],
-        "SubtitleProfiles": [
-            { "Format": "srt", "Method": "External" },
-            { "Format": "srt", "Method": "Embed" },
-            { "Format": "ass", "Method": "External" },
-            { "Format": "ass", "Method": "Embed" },
-            { "Format": "sub", "Method": "Embed" },
-            { "Format": "sub", "Method": "External" },
-            { "Format": "ssa", "Method": "Embed" },
-            { "Format": "ssa", "Method": "External" },
-            { "Format": "smi", "Method": "Embed" },
-            { "Format": "smi", "Method": "External" },
-            { "Format": "pgssub", "Method": "Embed" },
-            { "Format": "dvdsub", "Method": "Embed" },
-            { "Format": "pgs", "Method": "Embed" },
-        ],
-    }
 
     window.NativeShell = {
         AppHost: {
@@ -205,12 +177,12 @@
 
             getDeviceProfile: function (profileBuilder) {
                 postMessage('AppHost.getDeviceProfile');
-                return deviceprofile;
+                return null; //deviceprofile;
             },
 
             getSyncProfile: function (profileBuilder) {
                 postMessage('AppHost.getSyncProfile');
-                return deviceprofile;
+                return null; //deviceprofile;
             },
 
             supports: function (command) {
@@ -241,7 +213,7 @@
 
         getPlugins: function () {
             postMessage('getPlugins');
-            return [ijkplayerPlugin];
+            return [vlcplayerPlugin];
         },
 
         openUrl: function (url, target) {

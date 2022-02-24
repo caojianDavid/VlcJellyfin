@@ -18,15 +18,15 @@ var appInfo = {
 
 //Adds .includes to string to do substring matching
 if (!String.prototype.includes) {
-  String.prototype.includes = function(search, start) {
-    'use strict';
+    String.prototype.includes = function (search, start) {
+        'use strict';
 
-    if (search instanceof RegExp) {
-      throw TypeError('first argument must not be a RegExp');
-    }
-    if (start === undefined) { start = 0; }
-    return this.indexOf(search, start) !== -1;
-  };
+        if (search instanceof RegExp) {
+            throw TypeError('first argument must not be a RegExp');
+        }
+        if (start === undefined) { start = 0; }
+        return this.indexOf(search, start) !== -1;
+    };
 }
 
 
@@ -278,7 +278,7 @@ function handleSuccessServerInfo(data, baseurl, auto_connect) {
 }
 
 function handleSuccessManifest(data, baseurl) {
-    if(data.start_url.includes("/web")){
+    if (data.start_url.includes("/web")) {
         var hosturl = normalizeUrl(baseurl + "/" + data.start_url);
     } else {
         var hosturl = normalizeUrl(baseurl + "/web/" + data.start_url);
@@ -355,22 +355,34 @@ function loadUrl(url, success, failure) {
 function getTextToInject(success, failure) {
     var bundle = {};
 
-    var urls = ['js/webOS.js', 'css/webOS.css'];
+    var urls = ['js/webOS.js', 'css/webOS.css', 'js/VLCPlayer.js'];
+
+    loadUrl(urls[0], function (data) {
+        bundle['js'] = data;
+    }, failure);
+
+    loadUrl(urls[1], function (data) {
+        bundle['css'] = data;
+    }, failure);
+
+    loadUrl(urls[2], function (data) {
+        bundle['player'] = data;
+    }, failure);
 
     // imitate promises as they're borked in at least WebOS 2
-    var looper = function (idx) {
-        if (idx >= urls.length) {
-            success(bundle);
-        } else {
-            var url = urls[idx];
-            var ext = url.split('.').pop();
-            loadUrl(url, function (data) {
-                bundle[ext] = (bundle[ext] || '') + data;
-                looper(idx + 1);
-            }, failure);
-        }
-    };
-    looper(0);
+    // var looper = function (idx) {
+    //     if (idx >= urls.length) {
+    //         success(bundle);
+    //     } else {
+    //         var url = urls[idx];
+    //         var ext = url.split('.').pop();
+    //         loadUrl(url, function (data) {
+    //             bundle[ext] = (bundle[ext] || '') + data;
+    //             looper(idx + 1);
+    //         }, failure);
+    //     }
+    // };
+    // looper(0);
 }
 
 function injectScriptText(document, text) {
@@ -403,6 +415,10 @@ function handoff(url, bundle) {
         contentFrame.removeEventListener('load', onLoad);
 
         injectScriptText(contentFrame.contentDocument, 'window.AppInfo = ' + JSON.stringify(appInfo) + ';');
+
+        if (bundle.player) {
+            injectScriptText(contentFrame.contentDocument, bundle.player);
+        }
 
         if (bundle.js) {
             injectScriptText(contentFrame.contentDocument, bundle.js);
@@ -478,7 +494,7 @@ function renderServerList() {
         btn.innerText = "Connect";
         btn.type = "button";
         btn.value = server.Address;
-        btn.onclick = function() {
+        btn.onclick = function () {
             var urlfield = document.getElementById("baseurl");
             urlfield.value = this.value;
             handleServerSelect();
