@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.KeyEvent;
 
 import org.xwalk.core.XWalkView;
 
@@ -32,5 +33,13 @@ public class myXWalkView extends XWalkView {
     public void onShow() {
         Log.d(TAG, "onShow: ");
         //super.onShow();
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if(event.getKeyCode() == KeyEvent.KEYCODE_BACK){
+            return false;
+        }
+        return super.dispatchKeyEvent(event);
     }
 }

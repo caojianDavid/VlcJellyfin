@@ -113,7 +113,7 @@ public class MainActivity extends XWalkActivity {
                             ParentView.removeView(player);
                             player = null;
                             xwalkView.setVisibility(View.VISIBLE);
-                            xwalkView.evaluateJavascript("javascript:window.VlcPlayer.notifyCanceled()",null);
+                            xwalkView.evaluateJavascript("javascript:window.postmsg('notifyCanceled','')",null);
                         }
                     });
 
@@ -148,7 +148,7 @@ public class MainActivity extends XWalkActivity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        Log.d(TAG, "播放器按键按下：" + keyCode);
+        Log.d(TAG, "onKeyDown播放器按键按下：" + keyCode);
         if (player != null) {
             int currPostion = player.getCurrentPosition();
             if (!Controller.isShowing()) {
@@ -188,10 +188,15 @@ public class MainActivity extends XWalkActivity {
                     if (xwalkView.getVisibility() == View.VISIBLE) {
                         xwalkView.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ESCAPE));
                     }
-                    return true;
             }
             return true;
         }
         //return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public void onBackPressed() {
+        return;
+        //super.onBackPressed();
     }
 }

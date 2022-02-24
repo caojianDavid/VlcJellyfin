@@ -35,102 +35,19 @@
         'multiserver'
     ];
 
-    // class ijkplayer {
-    //     constructor() {
-    //         this.priority = -2;
-    //         this.name = 'IJK Player';
-    //         this.type = 'mediaplayer';
-    //         this.id = 'ijkplayer';
-    //         this.isLocalPlayer = true;
-    //     }
+    window.addEventListener('message', function (data) {
+        var msg = data.data;
+        console.log("接收到消息：" + msg.type);
+        switch (msg.type) {
+            case 'notifyCanceled':
+                window.VlcPlayer.notifyCanceled();
+                break;
+            case 'notifyTimeUpdate':
+                window.VlcPlayer.notifyTimeUpdate(msg.data);
+                break;
+        }
+    });
 
-    //     play(options) {
-    //         // Sanitize input
-    //         return new Promise(function (resolve, reject) {
-    //             var re = /^(http.*?)\?/;
-    //             var url = re.exec(options.url);
-    //             if (url) {
-    //                 if (url.length == 2) {
-    //                     var videoUrl = url[1] + '?static=true';
-    //                     window.NativeInterface.toPlay(videoUrl);
-    //                 } else {
-    //                     console.log('播放链接错误!');
-    //                 }
-    //             } else {
-    //                 console.log('没有获取到播放链接');
-    //             }
-    //             this.loading.hide();
-    //         });
-    //     }
-
-    //     stop(destroyPlayer) {
-    //         return Promise.resolve();
-    //     }
-
-    //     destroy() {
-    //         console.log('销毁destroy');
-    //     }
-    //     canPlayMediaType(mediaType) {
-    //         mediaType = (mediaType || '').toLowerCase();
-    //         return mediaType === 'audio' || mediaType === 'video';
-    //     }
-
-    //     canPlayItem(item) {
-    //         // Does not play server items
-    //         return true;
-    //     }
-
-    //     canPlayUrl(url) {
-    //         return true;
-    //     }
-
-    //     getDeviceProfile() {
-    //         return deviceprofile;
-    //     }
-
-    //     currentSrc() {
-    //         return '';
-    //     }
-
-    //     // Save this for when playback stops, because querying the time at that point might return 0
-    //     currentTime(val) {
-    //         if (val != null) {
-    //             window.NativeInterface.seekTo(val);
-    //             return;
-    //         } else {
-    //             var ct = 0;
-    //             ct = window.NativeInterface.getPostion();
-    //             return ct
-    //         }
-    //     }
-
-    //     duration() {
-    //         return window.NativeInterface.getDuration();;
-    //     }
-    //     pause() {
-
-    //     }
-    //     unpause() {
-
-    //     }
-    //     paused() {
-    //         return false;
-    //     }
-    //     volume(val) {
-    //         //             if (val != null) {
-    //         //                 return this.setVolume(val);
-    //         //             }
-    //         //             return this.getVolume();
-    //     }
-
-    //     setMute(mute) {
-
-    //     }
-
-    //     isMuted() {
-
-    //     }
-    // }
 
     var vlcplayerPlugin = new Promise(function (resolve) {
         return resolve(function () {

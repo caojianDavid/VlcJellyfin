@@ -1,6 +1,9 @@
-function VlcPlayerPlugin() {
-
+function VlcPlayerPlugin(events,playbackManager) {
     var self = this;
+    window.VlcPlayer = this;
+
+    self.events = events;
+    self.playbackManager = playbackManager;
 
     self.name = 'Vlc Player';
     self.type = 'mediaplayer';
@@ -38,7 +41,7 @@ function VlcPlayerPlugin() {
     };
 
     self.play = function (options) {
-        window.VlcPlayer = this;
+        console.log(window);
         return new Promise(function (resolve) {
             self._currentTime = (options.playerStartPositionTicks || 0) / 10000;
             self._paused = false;
@@ -118,7 +121,7 @@ function VlcPlayerPlugin() {
                 src: self._currentSrc
             };
 
-            events.trigger(self, 'stopped', [stopInfo]);
+            self.events.trigger(self, 'stopped', [stopInfo]);
             self._currentSrc = self._currentTime = null;
         });
     };
@@ -130,11 +133,12 @@ function VlcPlayerPlugin() {
             currentTime = currentTime / 1000;
             self._timeUpdated = self._currentTime != currentTime;
             self._currentTime = currentTime;
-            events.trigger(self, 'timeupdate');
+            self.events.trigger(self, 'timeupdate');
         });
     };
 
     self.notifyCanceled = function () {
+        console.log("播放终止");
         // required to not mark an item as seen / completed without time changes
         let currentTime = self._currentTime || 0;
         self.notifyTimeUpdate(currentTime - 1);

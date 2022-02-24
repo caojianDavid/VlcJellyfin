@@ -562,3 +562,11 @@ window.addEventListener('message', function (msg) {
             break;
     }
 });
+
+window.postmsg = function(type,data){
+    var contentFrame = document.querySelector('#contentFrame');
+    contentFrame.contentWindow.postMessage({
+                             type: type,
+                             data: data
+                         }, '*');
+}
