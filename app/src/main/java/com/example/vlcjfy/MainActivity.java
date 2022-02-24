@@ -49,7 +49,7 @@ public class MainActivity extends XWalkActivity {
 //                if(path.endsWith("VlcPlayerPlugin.js")){
 //                    InputStream is = null;
 //                    try {
-//                        is = getAssets().open("frontend/js/extplayer.js");
+//                        is = getAssets().open("frontend/js/VLCPlayer.js");
 //                    } catch (IOException e) {
 //                        e.printStackTrace();
 //                    }

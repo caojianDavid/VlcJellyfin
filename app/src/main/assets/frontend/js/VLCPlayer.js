@@ -41,7 +41,6 @@ function VlcPlayerPlugin(events,playbackManager) {
     };
 
     self.play = function (options) {
-        console.log(window);
         return new Promise(function (resolve) {
             self._currentTime = (options.playerStartPositionTicks || 0) / 10000;
             self._paused = false;
@@ -74,7 +73,8 @@ function VlcPlayerPlugin(events,playbackManager) {
 
     self.currentTime = function () {
         self._currentTime = window.ExternalPlayer.getPostion() || self._currentTime ;
-        return self._currentTime * 1000;
+        console.log("当前进度：" + self._currentTime);
+        return self._currentTime; // * 1000;
         //return (self._currentTime || 0) * 1000;
     };
 
@@ -83,6 +83,7 @@ function VlcPlayerPlugin(events,playbackManager) {
     };
 
     self.destroy = function () {
+        console.log("销毁");
     };
 
     self.pause = function () {
@@ -96,6 +97,7 @@ function VlcPlayerPlugin(events,playbackManager) {
     };
 
     self.stop = function (destroyPlayer) {
+        console.log("停止");
         return new Promise(function (resolve) {
             if (destroyPlayer) {
                 self.destroy();
@@ -121,7 +123,7 @@ function VlcPlayerPlugin(events,playbackManager) {
                 src: self._currentSrc
             };
 
-            self.events.trigger(self, 'stopped', [stopInfo]);
+            window.Events.trigger(self, 'stopped', [stopInfo]);
             self._currentSrc = self._currentTime = null;
         });
     };
@@ -133,7 +135,7 @@ function VlcPlayerPlugin(events,playbackManager) {
             currentTime = currentTime / 1000;
             self._timeUpdated = self._currentTime != currentTime;
             self._currentTime = currentTime;
-            self.events.trigger(self, 'timeupdate');
+            window.Events.trigger(self, 'timeupdate');
         });
     };
 
