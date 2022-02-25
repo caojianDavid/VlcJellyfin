@@ -57,28 +57,6 @@ public class VideoController implements SeekBar.OnSeekBarChangeListener, View.On
     public static final int STATE_PLAYING = 1;
     public static final int STATE_PAUSE = 2;
 
-
-    private Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case FADE_OUT:
-                    hide();
-                    break;
-                case SHOW_PROGRESS:
-                    long pos = setProgress();
-                    if (player != null) {
-                        if (mShowing && player.isPlaying()) {
-                            msg = obtainMessage(SHOW_PROGRESS);
-                            sendMessageDelayed(msg, 1000 - (pos % 1000));
-                        }
-                    }
-                    break;
-            }
-            //super.handleMessage(msg);
-        }
-    };
-
     VideoController(Context context) {
         this.context = context;
         CreateController();
@@ -172,24 +150,11 @@ public class VideoController implements SeekBar.OnSeekBarChangeListener, View.On
             layout_bottom.setVisibility(VISIBLE);
             mShowing = true;
         }
-
-        handler.sendEmptyMessage(SHOW_PROGRESS);
-
-        Message msg = handler.obtainMessage(FADE_OUT);
-        if (ShowTime != 0) {
-            handler.removeMessages(FADE_OUT);
-            handler.sendMessageDelayed(msg, ShowTime);
-        }
         mPauseBtn.requestFocus();
     }
 
     public void hide() {
-        try {
-            layout_bottom.setVisibility(GONE);
-            handler.removeMessages(SHOW_PROGRESS);
-        } catch (IllegalArgumentException ex) {
-            Log.w("MediaController", "already removed");
-        }
+        layout_bottom.setVisibility(GONE);
         mShowing = false;
     }
 
