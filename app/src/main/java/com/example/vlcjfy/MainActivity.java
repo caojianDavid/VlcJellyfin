@@ -132,7 +132,7 @@ public class MainActivity extends XWalkActivity {
 
                     FrameLayout.LayoutParams ll = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
                     ParentView.addView(player, ll);
-                    Controller = new VideoController(ParentView);
+                    Controller = new VideoController(getApplicationContext());
                     Controller.setPlayer(player);
                     player.setController(Controller);
                     player.start();

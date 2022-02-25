@@ -34,7 +34,7 @@ import java.util.Locale;
 
 public class VideoController implements SeekBar.OnSeekBarChangeListener, View.OnClickListener {
     private String TAG = "VideoController";
-    private ViewGroup ParentView = null;
+    private Context context = null;
     private boolean mShowing = false;
     private VLCPlayer player;
     private View ControllerView;
@@ -79,19 +79,14 @@ public class VideoController implements SeekBar.OnSeekBarChangeListener, View.On
         }
     };
 
-    VideoController(ViewGroup parentView) {
-        this.ParentView = parentView;
+    VideoController(Context context) {
+        this.context = context;
         CreateController();
     }
 
     private void CreateController() {
-        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-        );
-        LayoutInflater inflate = (LayoutInflater) ParentView.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflate = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         ControllerView = inflate.inflate(R.layout.player_control_view, null);
-        ParentView.addView(ControllerView, layoutParams);
         //ControllerView.setVisibility(GONE);
 
         layout_bottom = ControllerView.findViewById(R.id.layout_bottom);
@@ -123,6 +118,11 @@ public class VideoController implements SeekBar.OnSeekBarChangeListener, View.On
 
     public void setPlayer(VLCPlayer player) {
         this.player = player;
+        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+        );
+        player.addView(ControllerView, layoutParams);
     }
 
     private long setProgress() {
@@ -288,9 +288,13 @@ public class VideoController implements SeekBar.OnSeekBarChangeListener, View.On
 
     public void stop(){
         hide();
-        ParentView.removeView(ControllerView);
-        ControllerView = null;
+        destroy();
         player.stop();
+    }
+
+    public void destroy(){
+        player.removeView(ControllerView);
+        ControllerView = null;
     }
 
     @Override
