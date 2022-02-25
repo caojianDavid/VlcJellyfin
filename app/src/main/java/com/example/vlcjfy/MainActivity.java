@@ -206,10 +206,4 @@ public class MainActivity extends XWalkActivity {
         }
         //return super.onKeyDown(keyCode, event);
     }
-
-    @Override
-    public void onBackPressed() {
-        return;
-        //super.onBackPressed();
-    }
 }
