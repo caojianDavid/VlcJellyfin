@@ -30,6 +30,8 @@ import org.xwalk.core.XWalkView;
 import org.xwalk.core.XWalkWebResourceRequest;
 import org.xwalk.core.XWalkWebResourceResponse;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 public class MainActivity extends XWalkActivity {
@@ -37,25 +39,26 @@ public class MainActivity extends XWalkActivity {
     private myXWalkView xwalkView;
     private VLCPlayer player;
     private VideoController Controller;
+    private NativePlayer nativePlayer;
 
     @Override
     protected void onXWalkReady() {
         xwalkView.setResourceClient(new XWalkResourceClient(xwalkView) {
             @Override
             public XWalkWebResourceResponse shouldInterceptLoadRequest(XWalkView view, XWalkWebResourceRequest request) {
-//                Uri uri = request.getUrl();
-//                String path = uri.getPath();
-//                //Log.d(TAG, "shouldInterceptLoadRequest: console :" + path);
-//                if(path.endsWith("VlcPlayerPlugin.js")){
-//                    InputStream is = null;
-//                    try {
-//                        is = getAssets().open("frontend/js/VLCPlayer.js");
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    }
-//                    XWalkWebResourceResponse xwrr = createXWalkWebResourceResponse("text/javascript","UTF-8",is);
-//                    return xwrr;
-//                }
+                Uri uri = request.getUrl();
+                String path = uri.getPath();
+                //Log.d(TAG, "shouldInterceptLoadRequest: console :" + path);
+                if(path.endsWith("exoplayer.js")){
+                    InputStream is = null;
+                    try {
+                        is = getAssets().open("frontend/js/exoplayer.js");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    XWalkWebResourceResponse xwrr = createXWalkWebResourceResponse("text/javascript","UTF-8",is);
+                    return xwrr;
+                }
                 return super.shouldInterceptLoadRequest(view, request);
             }
         });
@@ -70,7 +73,9 @@ public class MainActivity extends XWalkActivity {
         settings.setAllowFileAccessFromFileURLs(true);
         settings.setAllowUniversalAccessFromFileURLs(true);
 
-        xwalkView.addJavascriptInterface(new VLCCallBack(), "ExternalPlayer");
+        nativePlayer = new NativePlayer(this);
+        xwalkView.addJavascriptInterface(nativePlayer,"NativePlayer");
+        //xwalkView.addJavascriptInterface(new VLCCallBack(), "ExternalPlayer");
         String url = "file:///android_asset/frontend/index.html";
         xwalkView.loadUrl(url);
     }
