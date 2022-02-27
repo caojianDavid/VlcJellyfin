@@ -1,6 +1,7 @@
 package com.example.vlcjfy;
 
 import android.content.Context;
+import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.os.Build;
 import android.util.AttributeSet;
@@ -36,6 +37,7 @@ public class VLCPlayer extends VLCVideoLayout implements MediaController.MediaPl
 
     private int Buffering = 0;
     private int CurrentPostion = 0;
+    public int state = PlaybackState.STATE_NONE;
 
     public VLCPlayer(@NonNull Context context) {
         super(context);
@@ -91,33 +93,33 @@ public class VLCPlayer extends VLCVideoLayout implements MediaController.MediaPl
             public void onEvent(MediaPlayer.Event event) {
                 switch (event.type){
                     case MediaPlayer.Event.Opening:  //媒体打开
-                        Log.d(TAG, "onEvent: 媒体打开");
+                        state = PlaybackState.STATE_STOPPED;
                         break;
                     case MediaPlayer.Event.Buffering: //媒体加载public float getBuffering() 获取加载视频流的进度0-100
                         Buffering = (int) event.getBuffering();
-                        Log.d(TAG, "onEvent: 加载中" + Buffering);
+                        state = PlaybackState.STATE_BUFFERING;
                         Controller.showLoading(Buffering);
                         break;
                     case MediaPlayer.Event.Playing: //媒体打开成功
-                        Log.d(TAG, "onEvent: 媒体打开成功");
+                        state = PlaybackState.STATE_PLAYING;
                         Controller.hide();
                         Controller.hidePauseImage();
                         break;
                     case MediaPlayer.Event.Paused://媒体暂停
-                        Log.d(TAG, "onEvent: 媒体暂停");
+                        state = PlaybackState.STATE_PAUSED;
                         Controller.showPauseImage();
                         break;
                     case MediaPlayer.Event.Stopped://媒体结束、中断
-                        Log.d(TAG, "onEvent: 媒体结束、中断Stopped");
+                        state = PlaybackState.STATE_STOPPED;
                         if(ivlcPlayer != null){
                             ivlcPlayer.onPlayEnd();
                         }
                         break;
                     case MediaPlayer.Event.EndReached://媒体播放结束
-                        Log.d(TAG, "onEvent: 媒体播放结束 EndReached");
+                        Log.d(TAG, "onEvent: EndReached");
                         break;
                     case MediaPlayer.Event.EncounteredError://媒体播放错误
-                        Log.d(TAG, "onEvent: 媒体播放错误");
+                        Log.d(TAG, "onEvent: EncounteredError");
                         break;
                     case MediaPlayer.Event.TimeChanged://视频时间变化
                         // public long getTimeChanged(); 获取当前播放视频的时间
