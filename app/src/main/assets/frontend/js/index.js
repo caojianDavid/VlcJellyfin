@@ -11,8 +11,8 @@ var manifest = false;
 
 var appInfo = {
     deviceId: null,
-    deviceName: 'IJKPlayer',
-    appName: 'Jellyfin for IJKPlayer',
+    deviceName: 'VLCPlayer',
+    appName: 'Jellyfin for VLCPlayer',
     appVersion: '0.0.1'
 };
 

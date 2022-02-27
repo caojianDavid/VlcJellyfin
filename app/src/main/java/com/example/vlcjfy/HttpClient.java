@@ -25,8 +25,10 @@ import javax.net.ssl.X509TrustManager;
 
 public class HttpClient {
     public static String TAG = "HttpClient:";
+    public static String x_emby_authorization = "MediaBrowser Client=\"Jellyfin for VLCPlayer\", Device=\"VLCPlayer\", DeviceId=\"TW96aWxsYS81LjAgKFdpbmRvd3MgTlQgMTAuMDsgV09XNjQpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIENocm9tZS81My4wLjI3ODUuMTEzIFNhZmFyaS81MzcuMzZ8MTY0NTg1MTM5NDg3Ng11\", Version=\"0.0.1\", Token=\"%s\"";
 
-    public static String doPost(String urlStr, String json) throws IOException {
+    public static String doPost(String urlStr, String json,String token) throws IOException {
+        Log.d(TAG, "doPost: url:" + urlStr);
         String result = "";
         URL url = new URL(urlStr);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -37,6 +39,7 @@ public class HttpClient {
             https.setHostnameVerifier(DO_NOT_VERIFY);
             conn = https;
         }
+        conn.setRequestProperty("x-emby-authorization", String.format(x_emby_authorization, token));
         //设置超时间为3秒
         conn.setConnectTimeout(3 * 1000);
         conn.setRequestMethod("POST");

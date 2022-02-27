@@ -30,7 +30,7 @@ define(['events', 'appSettings', 'loading', 'playbackManager'], function (events
                     }
                 );
                 console.log(JSON.stringify(options));
-                window.NativePlayer.loadPlayer(window.baseurl,JSON.stringify(options));
+                window.NativePlayer.loadPlayer(window.baseurl,window.ApiClient.accessToken(),JSON.stringify(options));
                 loading.hide();
                 resolve();
             });

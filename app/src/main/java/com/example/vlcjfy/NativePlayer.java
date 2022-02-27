@@ -1,6 +1,7 @@
 package com.example.vlcjfy;
 
 import android.app.Activity;
+import android.media.session.PlaybackState;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,8 @@ import org.xwalk.core.JavascriptInterface;
 import org.xwalk.core.XWalkView;
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class NativePlayer {
     private final String TAG = "NativePlayer";
@@ -28,6 +31,8 @@ public class NativePlayer {
     public ArrayList<JYFMediaItem> medialist;
     public int currentItem = 0;
     public String BaseUrl = "";
+    public String token = "";
+    public Timer timer = new Timer();
 
     public NativePlayer(Activity mainactivity) {
         this.mainactivity = mainactivity;
@@ -40,8 +45,9 @@ public class NativePlayer {
     }
 
     @JavascriptInterface
-    public void loadPlayer(String baseUrl,String args) {
+    public void loadPlayer(String baseUrl,String accessToken,String args) {
         BaseUrl =  baseUrl;
+        token = accessToken;
         Log.d(TAG, "loadPlayer: " + baseUrl + " args:" + args);
         JSONObject mediaSource = null;
         medialist = new ArrayList<>();
@@ -78,10 +84,11 @@ public class NativePlayer {
                 player.setIVLCPlayer(new IVLCPlayer() {
                     @Override
                     public void onPlayEnd() {
+                        timer.cancel();
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
-                                ReportPlayback.ReportPlaybackStop(BaseUrl, mediaItem.Id, player.getCurrentPosition());
+                                ReportPlayback.ReportPlaybackStop(BaseUrl, mediaItem.Id, player.getCurrentPosition(),token);
                             }
                         }).start();
                         destroyPlayer();
@@ -96,6 +103,19 @@ public class NativePlayer {
             }
         });
         player.start();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if(player != null) {
+                    ReportPlayback.ReportPlaybackProgress(BaseUrl,
+                            mediaItem.Id,
+                            player.state == PlaybackState.STATE_PAUSED,
+                            player.getCurrentPosition(),
+                            token
+                    );
+                }
+            }
+        },10000,10000);
     }
 
     @JavascriptInterface
