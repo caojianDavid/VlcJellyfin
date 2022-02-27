@@ -3,9 +3,9 @@ package com.example.vlcjfy;
 import static java.lang.Math.abs;
 
 import android.content.Context;
+import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.os.Build;
-import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.AttributeSet;
 
 import androidx.annotation.MainThread;
@@ -119,7 +119,7 @@ public class PlayerController extends VLCVideoLayout implements IVLCVout.Callbac
     }
 
     public boolean isPlaying() {
-        return playbackState == PlaybackStateCompat.STATE_PLAYING;
+        return playbackState == PlaybackState.STATE_PLAYING;
     }
 
     public boolean isVideoPlaying() {
@@ -197,7 +197,7 @@ public class PlayerController extends VLCVideoLayout implements IVLCVout.Callbac
     }
 
     public float getRate(){
-        if (mediaplayer.hasMedia() && !mediaplayer.isReleased() && playbackState != PlaybackStateCompat.STATE_STOPPED){
+        if (mediaplayer.hasMedia() && !mediaplayer.isReleased() && playbackState != PlaybackState.STATE_STOPPED){
             return mediaplayer.getRate();
         }
         return 1.0f;
@@ -365,7 +365,7 @@ public class PlayerController extends VLCVideoLayout implements IVLCVout.Callbac
         return iml;
     }
 
-    private int playbackState = PlaybackStateCompat.STATE_NONE;
+    private int playbackState = PlaybackState.STATE_NONE;
     private long lastTime = 0L;
     private float lastPosition = 0F;
 
@@ -376,7 +376,7 @@ public class PlayerController extends VLCVideoLayout implements IVLCVout.Callbac
     }
 
     private void setPlaybackStopped() {
-        playbackState = PlaybackStateCompat.STATE_STOPPED;
+        playbackState = PlaybackState.STATE_STOPPED;
         updateProgress(0L,0L);
         lastTime = 0L;
     }
@@ -396,10 +396,10 @@ public class PlayerController extends VLCVideoLayout implements IVLCVout.Callbac
     public void onEvent(MediaPlayer.Event event) {
         switch (event.type) {
             case MediaPlayer.Event.Playing:
-                playbackState = PlaybackStateCompat.STATE_PLAYING;
+                playbackState = PlaybackState.STATE_PLAYING;
                 break;
             case MediaPlayer.Event.Paused:
-                playbackState = PlaybackStateCompat.STATE_PAUSED;
+                playbackState = PlaybackState.STATE_PAUSED;
                 break;
             case MediaPlayer.Event.EncounteredError:
                 setPlaybackStopped();

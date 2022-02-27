@@ -3,7 +3,7 @@ define(['events', 'appSettings', 'loading', 'playbackManager'], function (events
 
     //constructor({ events, playbackManager, loading }) {
     return function () {
-        window['ExoPlayer'] = this;
+        window.ExoPlayer = this;
 
         this.events = events;
         this.playbackManager = playbackManager;
@@ -19,20 +19,18 @@ define(['events', 'appSettings', 'loading', 'playbackManager'], function (events
 
         // Current playback position in milliseconds
         this._currentTime = 0;
-        this._paused = true;
-
-        this._nativePlayer = window['NativePlayer'];
+        this._paused = true;        
 
         this.play = function (options) {
             return new Promise(function (resolve) {
                 self._paused = false;
                 options.items = options.items.map(
                     function (item) {
-                        return { 'id': item.Id, 'name': item.Name, 'startPositionTicks': item.playOptions.startPositionTicks };
+                        return { 'id': item.Id, 'name': item.Name, 'startPositionTicks': item.playOptions?item.playOptions.startPositionTicks : 0 };
                     }
                 );
                 console.log(JSON.stringify(options));
-                this._nativePlayer.loadPlayer(window.location.href,JSON.stringify(options));
+                window.NativePlayer.loadPlayer(window.baseurl,JSON.stringify(options));
                 loading.hide();
                 resolve();
             });
@@ -55,12 +53,12 @@ define(['events', 'appSettings', 'loading', 'playbackManager'], function (events
         }
 
         this.canPlayItem = function (item, playOptions) {
-            return this._nativePlayer.isEnabled();
+            return window.NativePlayer.isEnabled();
         }
 
         this.stop = function (destroyPlayer) {
             return new Promise(function (resolve) {
-                this._nativePlayer.stopPlayer();
+                window.NativePlayer.stopPlayer();
 
 
                 if (destroyPlayer) {
@@ -76,12 +74,12 @@ define(['events', 'appSettings', 'loading', 'playbackManager'], function (events
         this.previousTrack = function () { }
 
         this.seek = function (ticks) {
-            this._nativePlayer.seek(ticks);
+            window.NativePlayer.seek(ticks);
         }
 
         this.currentTime = function (ms) {
             if (ms !== undefined) {
-                this._nativePlayer.seekMs(ms);
+                window.NativePlayer.seekMs(ms);
             }
             return this._currentTime;
         }
@@ -104,7 +102,7 @@ define(['events', 'appSettings', 'loading', 'playbackManager'], function (events
 
         this.setVolume = function (vol) {
             let volume = parseInt(vol);
-            this._nativePlayer.setVolume(volume);
+            window.NativePlayer.setVolume(volume);
         }
 
         this.volumeUp = function () { }
@@ -117,7 +115,7 @@ define(['events', 'appSettings', 'loading', 'playbackManager'], function (events
 
         this.setMute = function (mute) {
             // Assume 30% as default when unmuting
-            this._nativePlayer.setVolume(mute ? 0 : 30);
+            window.NativePlayer.setVolume(mute ? 0 : 30);
         }
 
         this.toggleMute = function () { }
@@ -128,12 +126,12 @@ define(['events', 'appSettings', 'loading', 'playbackManager'], function (events
 
         this.pause = function () {
             this._paused = true;
-            this._nativePlayer.pausePlayer();
+            window.NativePlayer.pausePlayer();
         }
 
         this.unpause = function () {
             this._paused = false;
-            this._nativePlayer.resumePlayer();
+            window.NativePlayer.resumePlayer();
         }
 
         this.playPause = function () {
@@ -185,7 +183,7 @@ define(['events', 'appSettings', 'loading', 'playbackManager'], function (events
         }
 
         this.destroy = function () {
-            this._nativePlayer.destroyPlayer();
+            window.NativePlayer.destroyPlayer();
         }
 
         this.getDeviceProfile = function () {

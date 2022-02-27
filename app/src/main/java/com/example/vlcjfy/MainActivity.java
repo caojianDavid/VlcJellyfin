@@ -75,7 +75,7 @@ public class MainActivity extends XWalkActivity {
 
         nativePlayer = new NativePlayer(this);
         xwalkView.addJavascriptInterface(nativePlayer,"NativePlayer");
-        //xwalkView.addJavascriptInterface(new VLCCallBack(), "ExternalPlayer");
+        xwalkView.addJavascriptInterface(new VLCCallBack(), "ExternalPlayer");
         String url = "file:///android_asset/frontend/index.html";
         xwalkView.loadUrl(url);
     }
@@ -167,34 +167,34 @@ public class MainActivity extends XWalkActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         Log.d(TAG, "onKeyDown播放器按键按下：" + keyCode);
-        if (player != null) {
-            int currPostion = player.getCurrentPosition();
-            if (!Controller.isShowing()) {
+        if (nativePlayer.player != null) {
+            int currPostion = nativePlayer.player.getCurrentPosition();
+            if (!nativePlayer.Controller.isShowing()) {
                 switch (keyCode) {
                     case KeyEvent.KEYCODE_DPAD_UP:
                     case KeyEvent.KEYCODE_DPAD_DOWN:
-                        Controller.show();
+                        nativePlayer.Controller.show();
                         return true;
                     case KeyEvent.KEYCODE_DPAD_RIGHT:
-                        player.seekTo(currPostion + (30 * 1000));
+                        nativePlayer.player.seekTo(currPostion + (30 * 1000));
                         return true;
                     case KeyEvent.KEYCODE_DPAD_LEFT:
-                        player.seekTo(currPostion - (10 * 1000));
+                        nativePlayer.player.seekTo(currPostion - (10 * 1000));
                         return true;
                     case KeyEvent.KEYCODE_ENTER:
                     case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-                        Controller.play();
+                        nativePlayer.Controller.play();
                         return true;
                     case KeyEvent.KEYCODE_ESCAPE:
                     case KeyEvent.KEYCODE_BACK:
-                        Controller.stop();
+                        nativePlayer.Controller.stop();
                         return true;
                 }
             } else {
                 switch (keyCode) {
                     case KeyEvent.KEYCODE_ESCAPE:
                     case KeyEvent.KEYCODE_BACK:
-                        Controller.hide();
+                        nativePlayer.Controller.hide();
                         return true;
                 }
             }

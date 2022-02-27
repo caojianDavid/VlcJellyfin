@@ -428,6 +428,8 @@ function handoff(url, bundle) {
         if (bundle.css) {
             injectStyleText(contentFrame.contentDocument, bundle.css);
         }
+
+        contentWindow.baseurl = storage.get('connected_server').baseurl;
     }
 
     function onUnload() {

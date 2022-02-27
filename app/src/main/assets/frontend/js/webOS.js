@@ -37,7 +37,6 @@
 
     window.addEventListener('message', function (data) {
         var msg = data.data;
-        console.log("接收到消息：" + msg.type);
         switch (msg.type) {
             case 'notifyCanceled':
                 window.VlcPlayer.notifyCanceled();
@@ -47,7 +46,6 @@
                 break;
         }
     });
-
 
     var vlcplayerPlugin = new Promise(function (resolve) {
         return resolve(function () {
@@ -130,7 +128,8 @@
 
         getPlugins: function () {
             postMessage('getPlugins');
-            return [vlcplayerPlugin];
+            //return [vlcplayerPlugin];
+            return ['exoplayer'];
         },
 
         openUrl: function (url, target) {

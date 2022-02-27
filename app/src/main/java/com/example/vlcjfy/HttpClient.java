@@ -44,7 +44,7 @@ public class HttpClient {
         OutputStream os = conn.getOutputStream();
         os.write(json.getBytes());
         int code = conn.getResponseCode();
-        Log.d(TAG, "doPost: ");
+        Log.d(TAG, "doPost: " + code);
         if(code == 200){
             InputStream is = conn.getInputStream();
             result = StreamToString(is);

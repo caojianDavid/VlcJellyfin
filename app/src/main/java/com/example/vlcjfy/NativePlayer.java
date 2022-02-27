@@ -22,7 +22,6 @@ import java.util.ArrayList;
 public class NativePlayer {
     private final String TAG = "NativePlayer";
     private Activity mainactivity;
-    private LibVLC mLibVLC;
     public VLCPlayer player;
     public VideoController Controller;
     public XWalkView xWalkView;
@@ -33,7 +32,6 @@ public class NativePlayer {
     public NativePlayer(Activity mainactivity) {
         this.mainactivity = mainactivity;
         xWalkView = mainactivity.getWindow().findViewById(R.id.xwalkview);
-        mLibVLC = new LibVLC(mainactivity.getApplicationContext(), null);
     }
 
     @JavascriptInterface
@@ -44,9 +42,9 @@ public class NativePlayer {
     @JavascriptInterface
     public void loadPlayer(String baseUrl,String args) {
         BaseUrl =  baseUrl;
-        Log.d(TAG, "loadPlayer: " + args);
+        Log.d(TAG, "loadPlayer: " + baseUrl + " args:" + args);
         JSONObject mediaSource = null;
-        String videoUrl = "";
+        medialist = new ArrayList<>();
         try {
             mediaSource = new JSONObject(args);
             currentItem = mediaSource.getInt("startIndex");
@@ -54,19 +52,19 @@ public class NativePlayer {
             for (int i = 0; i < js.length(); i++) {
                 JSONObject jo = js.getJSONObject(i);
                 JYFMediaItem m = new JYFMediaItem();
-                m.url = jo.getString("url");
+                m.Id = jo.getString("id");
+                m.url = baseUrl + "/videos/"+m.Id+"/stream.mp4?static=true";
                 m.name = jo.getString("name");
                 m.startPositionTicks = jo.getLong("startPositionTicks");
                 medialist.add(m);
             }
-            videoUrl = mediaSource.getString("url");
         } catch (Exception e) {
             Log.d(TAG, "loadPlayer: 异常" + e.toString());
         }
-        if (videoUrl == "") {
-            return;
+        if(medialist.size() > 0 && currentItem < medialist.size()){
+            createPlayer(medialist.get(currentItem));
         }
-        createPlayer(medialist.get(currentItem));
+
     }
 
     @JavascriptInterface
@@ -80,10 +78,14 @@ public class NativePlayer {
                 player.setIVLCPlayer(new IVLCPlayer() {
                     @Override
                     public void onPlayEnd() {
-                        ReportPlayback.ReportPlaybackStop(BaseUrl, mediaItem.Id, player.getCurrentPosition());
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                ReportPlayback.ReportPlaybackStop(BaseUrl, mediaItem.Id, player.getCurrentPosition());
+                            }
+                        }).start();
                         destroyPlayer();
                         xWalkView.setVisibility(View.VISIBLE);
-                        xWalkView.evaluateJavascript("javascript:window.postmsg('notifyEnded','')", null);
                     }
                 });
                 mainactivity.addContentView(player, ll);
