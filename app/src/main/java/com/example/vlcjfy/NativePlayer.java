@@ -26,8 +26,9 @@ public class NativePlayer {
     public VLCPlayer player;
     public VideoController Controller;
     public XWalkView xWalkView;
-    public ArrayList<MediaItem> medialist;
+    public ArrayList<JYFMediaItem> medialist;
     public int currentItem = 0;
+    public String BaseUrl = "";
 
     public NativePlayer(Activity mainactivity) {
         this.mainactivity = mainactivity;
@@ -42,6 +43,7 @@ public class NativePlayer {
 
     @JavascriptInterface
     public void loadPlayer(String baseUrl,String args) {
+        BaseUrl =  baseUrl;
         Log.d(TAG, "loadPlayer: " + args);
         JSONObject mediaSource = null;
         String videoUrl = "";
@@ -51,7 +53,7 @@ public class NativePlayer {
             JSONArray js = mediaSource.getJSONArray("items");
             for (int i = 0; i < js.length(); i++) {
                 JSONObject jo = js.getJSONObject(i);
-                MediaItem m = new MediaItem();
+                JYFMediaItem m = new JYFMediaItem();
                 m.url = jo.getString("url");
                 m.name = jo.getString("name");
                 m.startPositionTicks = jo.getLong("startPositionTicks");
@@ -64,11 +66,11 @@ public class NativePlayer {
         if (videoUrl == "") {
             return;
         }
-        createPlayer(baseUrl,medialist.get(currentItem));
+        createPlayer(medialist.get(currentItem));
     }
 
     @JavascriptInterface
-    public void createPlayer(String baseUrl,MediaItem mediaItem) {
+    public void createPlayer(JYFMediaItem mediaItem) {
         player = new VLCPlayer(mainactivity.getApplicationContext());
         player.setMedia(mediaItem.url);
         FrameLayout.LayoutParams ll = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
@@ -78,7 +80,7 @@ public class NativePlayer {
                 player.setIVLCPlayer(new IVLCPlayer() {
                     @Override
                     public void onPlayEnd() {
-                        ReportPlayback.ReportPlaybackStop(baseUrl, mediaItem.Id, player.getCurrentPosition());
+                        ReportPlayback.ReportPlaybackStop(BaseUrl, mediaItem.Id, player.getCurrentPosition());
                         destroyPlayer();
                         xWalkView.setVisibility(View.VISIBLE);
                         xWalkView.evaluateJavascript("javascript:window.postmsg('notifyEnded','')", null);
@@ -151,13 +153,4 @@ public class NativePlayer {
 
         }
     }
-
-    public class MediaItem {
-        public String url = "";
-        public String Id = "";
-        public String name = "";
-        public long startPositionTicks = 0L;
-        public long PositionTicks = 0L;
-    }
-
 }

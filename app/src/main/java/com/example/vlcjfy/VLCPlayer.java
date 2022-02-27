@@ -123,6 +123,9 @@ public class VLCPlayer extends VLCVideoLayout implements MediaController.MediaPl
                         // public long getTimeChanged(); 获取当前播放视频的时间
                         // public native long getLength();//获取视频总时间
                         CurrentPostion = (int) event.getTimeChanged();
+                        if(ivlcPlayer != null){
+                            ivlcPlayer.onPostionChenged();
+                        }
                         break;
                     case MediaPlayer.Event.PositionChanged://视频总时长的百分比public float getPositionChanged()//获取当前视频总时长的百分比0-1
                         //public native void setPosition(float var1);//让视频跳到指定位置
