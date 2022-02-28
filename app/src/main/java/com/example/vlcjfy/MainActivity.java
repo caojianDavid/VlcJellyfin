@@ -74,9 +74,9 @@ public class MainActivity extends XWalkActivity {
         settings.setAllowFileAccessFromFileURLs(true);
         settings.setAllowUniversalAccessFromFileURLs(true);
 
-        nativePlayer = new NativePlayer(this);
-        xwalkView.addJavascriptInterface(nativePlayer,"NativePlayer");
-        xwalkView.addJavascriptInterface(new VLCCallBack(), "ExternalPlayer");
+        //nativePlayer = new NativePlayer(this);
+        //xwalkView.addJavascriptInterface(nativePlayer,"NativePlayer");
+        xwalkView.addJavascriptInterface(new VLCCallBack(), "NativePlayer");
         String url = "file:///android_asset/frontend/index.html";
         xwalkView.loadUrl(url);
     }
