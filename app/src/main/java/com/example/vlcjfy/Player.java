@@ -129,6 +129,7 @@ public class Player extends VLCVideoLayout implements View.OnClickListener, Seek
                                 event.getTimeChanged(),
                                 accessToken
                         );
+                        PlayStop();
                         break;
                     case MediaPlayer.Event.EndReached://媒体播放结束
                         Log.d(TAG, "onEvent: EndReached");
@@ -267,6 +268,10 @@ public class Player extends VLCVideoLayout implements View.OnClickListener, Seek
         }else{
             player.play();
         }
+    }
+
+    public void PlayStop(){
+        PlayStart(currentItemIndex + 1);
     }
 
     public void release(){
