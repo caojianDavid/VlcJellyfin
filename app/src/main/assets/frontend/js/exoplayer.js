@@ -28,9 +28,10 @@ define(['events', 'appSettings', 'loading', 'playbackManager'], function (events
                     function (item) {
                         return { 'id': item.Id, 'name': item.Name, 'startPositionTicks': item.playOptions?item.playOptions.startPositionTicks : 0 };
                     }
-                );
+                );                
                 console.log(JSON.stringify(options));
-                window.NativePlayer.loadPlayer(window.baseurl,window.ApiClient.accessToken(),JSON.stringify(options));
+                var startIndex = options.startIndex || 0;
+                window.NativePlayer.loadPlayer(window.baseurl,window.ApiClient.accessToken(), startIndex,JSON.stringify(options));
                 loading.hide();
                 resolve();
             });
