@@ -13,6 +13,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -74,7 +75,6 @@ public class Player extends VLCVideoLayout implements View.OnClickListener, Seek
 
     public Player(@NonNull Context context) {
         super(context);
-
     }
 
     public Player(@NonNull Context context, @Nullable AttributeSet attrs) {
@@ -237,10 +237,6 @@ public class Player extends VLCVideoLayout implements View.OnClickListener, Seek
         }
     }
 
-    public void setMediaList(ArrayList<JYFMediaItem> list){
-        mediaList = list;
-    }
-
     public void PlayStart(int mediaListIndex) {
         if(mediaListIndex >= 0 && mediaListIndex < mediaList.size()) {
             currentItemIndex = mediaListIndex;
@@ -274,9 +270,11 @@ public class Player extends VLCVideoLayout implements View.OnClickListener, Seek
     }
 
     public void release(){
+        reportPlayBackTime.cancel();
         progressTime.cancel();
         player.release();
         libVLC.release();
+        ((ViewGroup)getParent()).removeView(this);
     }
 
     @Override
@@ -349,6 +347,8 @@ public class Player extends VLCVideoLayout implements View.OnClickListener, Seek
                     return true;
                 case KeyEvent.KEYCODE_ESCAPE:
                 case KeyEvent.KEYCODE_BACK:
+                    release();
+                    return true;
                     //退出
             }
         }else {
