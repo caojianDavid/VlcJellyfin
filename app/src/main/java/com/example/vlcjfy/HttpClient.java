@@ -43,15 +43,19 @@ public class HttpClient {
         //设置超时间为3秒
         conn.setConnectTimeout(3 * 1000);
         conn.setRequestMethod("POST");
-        conn.setRequestProperty("Content-type","application/json");
+        conn.setRequestProperty("Content-Type","application/json");
+        conn.connect();
         OutputStream os = conn.getOutputStream();
         os.write(json.getBytes());
+        os.flush();
+        os.close();
         int code = conn.getResponseCode();
         Log.d(TAG, "doPost: " + code);
         if(code == 200){
             InputStream is = conn.getInputStream();
             result = StreamToString(is);
         }
+        conn.disconnect();
         return result;
     }
 
@@ -66,6 +70,7 @@ public class HttpClient {
                 break;
             out.append(buffer, 0, rsz);
         }
+        in.close();
         return out.toString();
     }
 
