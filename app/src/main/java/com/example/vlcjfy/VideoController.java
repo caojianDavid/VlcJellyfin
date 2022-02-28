@@ -46,6 +46,7 @@ public class VideoController implements SeekBar.OnSeekBarChangeListener, View.On
 
     private LinearLayout layout_bottom;
     private ImageView mPauseBtn, mSubtitleBtn, mAudioBtn, mStopBtn;
+    private ImageView mNext,mPrevious,mSubject;
     private TextView tv_aspect, tv_speed;
     private SeekBar seekBar;
     private ProgressBar loadingBar;
@@ -74,6 +75,9 @@ public class VideoController implements SeekBar.OnSeekBarChangeListener, View.On
         mAudioBtn = ControllerView.findViewById(R.id.tv_audiotrack);
         tv_aspect = ControllerView.findViewById(R.id.tv_aspect);
         tv_speed = ControllerView.findViewById(R.id.tv_speed);
+        mNext = ControllerView.findViewById(R.id.tv_next);
+        mPrevious = ControllerView.findViewById(R.id.tv_previous);
+        mSubject = ControllerView.findViewById(R.id.tv_subject);
         seekBar = ControllerView.findViewById(R.id.bottom_seek_progress);
         loadingBar = ControllerView.findViewById(R.id.pb_loading);
         pauseImage = ControllerView.findViewById(R.id.pauseImage);
@@ -90,6 +94,9 @@ public class VideoController implements SeekBar.OnSeekBarChangeListener, View.On
         mAudioBtn.setOnClickListener(this);
         tv_aspect.setOnClickListener(this);
         tv_speed.setOnClickListener(this);
+        mNext.setOnClickListener(this);
+        mPrevious.setOnClickListener(this);
+        mSubject.setOnClickListener(this);
 
         setListener();
     }

@@ -145,6 +145,7 @@
                 android:focusable="true"/>
 
             <ImageView
+                android:id="@+id/tv_subject"
                 android:layout_width="@dimen/controllerbtn_width"
                 android:layout_height="@dimen/controllerbtn_height"
                 android:layout_margin="@dimen/controllerbtn_margin"
