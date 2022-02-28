@@ -395,6 +395,9 @@ public class PlayerController extends VLCVideoLayout implements IVLCVout.Callbac
     @Override
     public void onEvent(MediaPlayer.Event event) {
         switch (event.type) {
+            case MediaPlayer.Event.Opening:
+                playbackState = PlaybackState.STATE_NONE;
+                break;
             case MediaPlayer.Event.Playing:
                 playbackState = PlaybackState.STATE_PLAYING;
                 break;
