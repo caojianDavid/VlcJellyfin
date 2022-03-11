@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import org.chromium.mojo.system.Handle;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.videolan.libvlc.LibVLC;
@@ -173,6 +174,7 @@ public class MainActivity extends XWalkActivity {
         }else{
             if (xwalkView.getVisibility() == View.VISIBLE) {
                 xwalkView.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ESCAPE));
+                return true;
             }
         }
 //         if (nativePlayer.player != null) {
@@ -217,6 +219,6 @@ public class MainActivity extends XWalkActivity {
 //             }
 //             return true;
 //         }
-        //return super.onKeyDown(keyCode, event);
+        return super.onKeyDown(keyCode, event);
     }
 }
