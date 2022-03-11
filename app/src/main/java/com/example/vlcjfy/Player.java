@@ -11,11 +11,14 @@ import androidx.annotation.RequiresApi;
 
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -26,6 +29,7 @@ import org.videolan.libvlc.MediaPlayer;
 import org.videolan.libvlc.util.VLCVideoLayout;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -208,6 +212,66 @@ public class Player extends VLCVideoLayout implements View.OnClickListener, Seek
         PlayStart(currentItemIndex);
     }
 
+    private PopupMenu CreatePopupMenu(View pview){
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+            return new PopupMenu(context, pview, Gravity.CENTER);
+        } else {
+            return new PopupMenu(context, pview);
+        }
+    }
+
+    // type 1:播放速率，2:宽高比
+    public void showPopupMenu(View pview, ArrayList list, int type) {
+        PopupMenu popupMenu = CreatePopupMenu(pview);
+        for (int i = 0; i < list.size(); i++) {
+            popupMenu.getMenu().add(type, i,i, String.valueOf(list.get(i)));
+        }
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                int itemid = menuItem.getItemId();
+                int type = menuItem.getGroupId();
+                Log.d(TAG, "onMenuItemClick: " + itemid + ":" + type);
+                if (type == 1) {
+                    Float rate = rates[itemid];
+                    player.setRate(rate);
+                    mSpeed.setText(String.valueOf(rate));
+                } else if (type == 2) {
+                    String aspect = Aspects[itemid];
+                    player.setAspectRatio(aspect);
+                    mAspect.setText(aspect);
+                }
+                return true;
+            }
+        });
+        popupMenu.show();
+    }
+
+    // type 3:音轨，4：字幕
+    public void showPopupMenu(View pview, MediaPlayer.TrackDescription[] tracks, int type) {
+        if(tracks == null) return;
+        PopupMenu popupMenu = CreatePopupMenu(pview);
+        for (int i = 0; i < tracks.length; i++) {
+            MediaPlayer.TrackDescription track = tracks[i];
+            popupMenu.getMenu().add(type, track.id,i, track.name);
+        }
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                int itemid = menuItem.getItemId();
+                int type = menuItem.getGroupId();
+                Log.d(TAG, "onMenuItemClick: " + itemid + ":" + type);
+                if (type == 3) {
+                    player.setAudioTrack(itemid);
+                } else if (type == 4) {
+                    player.setSpuTrack(itemid);
+                }
+                return true;
+            }
+        });
+        popupMenu.show();
+    }
+
     public void ShowController(){
         layout_bottom.setVisibility(View.VISIBLE);
         isShowing = true;
@@ -300,16 +364,16 @@ public class Player extends VLCVideoLayout implements View.OnClickListener, Seek
                 PlayStart(currentItemIndex -1);
                 break;
             case R.id.tv_subtrack:
-                //showPopupMenu(view, player.getSpuTracks(),4);
+                showPopupMenu(view, player.getSpuTracks(),4);
                 break;
             case R.id.tv_audiotrack:
-                //showPopupMenu(view, player.getAudioTracks(),3);
+                showPopupMenu(view, player.getAudioTracks(),3);
                 break;
             case R.id.tv_aspect:
-                //showPopupMenu(view,new ArrayList<String>(Arrays.asList(Aspects)),2);
+                showPopupMenu(view,new ArrayList<String>(Arrays.asList(Aspects)),2);
                 break;
             case R.id.tv_speed:
-                //showPopupMenu(view,new ArrayList<Float>(Arrays.asList(rates)),1);
+                showPopupMenu(view,new ArrayList<Float>(Arrays.asList(rates)),1);
                 break;
         }
     }

@@ -113,7 +113,7 @@ public class MainActivity extends XWalkActivity {
                 Log.d(TAG, "loadPlayer: 异常" + e.toString());
             }
             if(medialist.size() > 0 ){
-                player = new Player(getApplicationContext(),baseUrl,accessToken,startIndex,medialist);
+                player = new Player(MainActivity.this,baseUrl,accessToken,startIndex,medialist);
             }
         }
         
