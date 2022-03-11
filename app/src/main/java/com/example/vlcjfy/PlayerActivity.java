@@ -125,15 +125,6 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
                         break;
                     case MediaPlayer.Event.Stopped://媒体结束、中断
                         Log.d(TAG, "onEvent: 播放结束！");
-                        reportPlayBackTime.cancel();  //取消进度报告
-                        reportPlayBackTime = null;
-                        PlayerState = PlaybackState.STATE_STOPPED;
-                        ReportPlayback.ReportPlaybackStop(      //报告状态结束
-                                baseUrl,
-                                mediaList.get(currentItemIndex).Id,
-                                event.getTimeChanged(),
-                                accessToken
-                        );
                         PlayStop();
                         break;
                     case MediaPlayer.Event.EndReached://媒体播放结束
@@ -346,6 +337,20 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     public void PlayStop(){
+        reportPlayBackTime.cancel();  //取消进度报告
+        reportPlayBackTime = null;
+        PlayerState = PlaybackState.STATE_STOPPED;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                ReportPlayback.ReportPlaybackStop(      //报告状态结束
+                        baseUrl,
+                        mediaList.get(currentItemIndex).Id,
+                        currentPostion,
+                        accessToken
+                );
+            }
+        }).start();
         PlayStart(currentItemIndex + 1);
     }
 
@@ -364,7 +369,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
                 play();
                 break;
             case R.id.tv_stop:
-                player.stop();
+                release();
                 break;
             case R.id.tv_next:
                 player.stop();
