@@ -6,6 +6,11 @@
     android:layout_gravity="bottom"
     android:orientation="vertical">
 
+    <org.videolan.libvlc.util.VLCVideoLayout
+        android:id="@+id/vlcVideoLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
     <LinearLayout
         android:id="@+id/layout_bottom"
         android:layout_width="match_parent"

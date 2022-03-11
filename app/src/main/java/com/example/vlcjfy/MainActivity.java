@@ -3,6 +3,7 @@ package com.example.vlcjfy;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -95,26 +96,40 @@ public class MainActivity extends XWalkActivity {
     public class VLCCallBack {
 
         @JavascriptInterface
-        public void loadPlayer(String baseUrl,String accessToken,int startIndex,String args) {
-            ArrayList<JYFMediaItem> medialist = new ArrayList<>();
-            try {
-                JSONObject mediaSource = new JSONObject(args);
-                JSONArray js = mediaSource.getJSONArray("items");
-                for (int i = 0; i < js.length(); i++) {
-                    JSONObject jo = js.getJSONObject(i);
-                    JYFMediaItem m = new JYFMediaItem();
-                    m.Id = jo.getString("id");
-                    m.url = baseUrl + "/videos/"+m.Id+"/stream.mp4?static=true";
-                    m.name = jo.getString("name");
-                    m.startPositionTicks = jo.getLong("startPositionTicks");
-                    medialist.add(m);
-                }
-            } catch (Exception e) {
-                Log.d(TAG, "loadPlayer: 异常" + e.toString());
-            }
-            if(medialist.size() > 0 ){
-                player = new Player(MainActivity.this,baseUrl,accessToken,startIndex,medialist);
-            }
+        public void loadPlayer(String baseUrl,String accessToken,int startIndex,String options) {
+            Intent intent = new Intent(MainActivity.this,PlayerActivity.class);
+            intent.putExtra("baseUrl",baseUrl);
+            intent.putExtra("accessToken",accessToken);
+            intent.putExtra("startIndex",accessToken);
+            intent.putExtra("options",options);
+            startActivity(intent);
+//            ArrayList<JYFMediaItem> medialist = new ArrayList<>();
+//            try {
+//                JSONObject mediaSource = new JSONObject(args);
+//                JSONArray js = mediaSource.getJSONArray("items");
+//                for (int i = 0; i < js.length(); i++) {
+//                    JSONObject jo = js.getJSONObject(i);
+//                    JYFMediaItem m = new JYFMediaItem();
+//                    m.Id = jo.getString("id");
+//                    m.url = baseUrl + "/videos/"+m.Id+"/stream.mp4?static=true";
+//                    m.name = jo.getString("name");
+//                    m.startPositionTicks = jo.getLong("startPositionTicks");
+//                    medialist.add(m);
+//                }
+//            } catch (Exception e) {
+//                Log.d(TAG, "loadPlayer: 异常" + e.toString());
+//            }
+//            if(medialist.size() > 0 ){
+//                runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        xwalkView.setVisibility(View.GONE);
+//                        player = new Player(MainActivity.this,baseUrl,accessToken,startIndex,medialist);
+//                        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+//                        addContentView(player,lp);
+//                    }
+//                });
+//            }
         }
         
 //         @JavascriptInterface

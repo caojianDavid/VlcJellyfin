@@ -54,7 +54,8 @@ define(['events', 'appSettings', 'loading', 'playbackManager'], function (events
         }
 
         this.canPlayItem = function (item, playOptions) {
-            return window.NativePlayer.isEnabled();
+            return true;
+            //return window.NativePlayer.isEnabled();
         }
 
         this.stop = function (destroyPlayer) {

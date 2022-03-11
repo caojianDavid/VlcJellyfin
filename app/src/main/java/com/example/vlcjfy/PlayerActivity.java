@@ -1,21 +1,19 @@
 package com.example.vlcjfy;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.content.Context;
+import android.content.Intent;
 import android.media.session.PlaybackState;
 import android.net.Uri;
-import android.os.Build;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-
-import android.util.AttributeSet;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
@@ -23,6 +21,8 @@ import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.videolan.libvlc.LibVLC;
 import org.videolan.libvlc.Media;
 import org.videolan.libvlc.MediaPlayer;
@@ -33,10 +33,9 @@ import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class Player extends VLCVideoLayout implements View.OnClickListener, SeekBar.OnSeekBarChangeListener {
-    public final String TAG = "PlayerFragment";
+public class PlayerActivity extends AppCompatActivity implements View.OnClickListener, SeekBar.OnSeekBarChangeListener {
+    private final String TAG = "PlayerActivity";
 
-    private Context context;
     public VLCVideoLayout vlcOut;
     public LibVLC libVLC;
     public MediaPlayer player;
@@ -62,38 +61,38 @@ public class Player extends VLCVideoLayout implements View.OnClickListener, Seek
     private Timer progressTime = null;
     private Timer reportPlayBackTime = null;
 
-    public Player(Context context,
-                  String baseUrl,
-                  String accessToken,
-                  int startIndex,
-                  ArrayList<JYFMediaItem> mediaList) {
-        super(context);
-        this.context = context;
-        this.baseUrl = baseUrl;
-        this.accessToken = accessToken;
-        this.currentItemIndex = startIndex;
-        this.mediaList = mediaList;
-        View view = inflate(context,R.layout.player_control_view,this);
-        initView(view);
-    }
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.player_control_view);
 
-    public Player(@NonNull Context context) {
-        super(context);
+        Intent intent = getIntent();
+        this.baseUrl = intent.getStringExtra("baseUrl");
+        this.accessToken = intent.getStringExtra("accessToken");
+        this.currentItemIndex = intent.getIntExtra("startIndex",0);
+        String options = intent.getStringExtra("options");
+        mediaList = new ArrayList<>();
+        try {
+            JSONObject mediaSource = new JSONObject(options);
+            JSONArray js = mediaSource.getJSONArray("items");
+            for (int i = 0; i < js.length(); i++) {
+                JSONObject jo = js.getJSONObject(i);
+                JYFMediaItem m = new JYFMediaItem();
+                m.Id = jo.getString("id");
+                m.url = baseUrl + "/videos/"+m.Id+"/stream.mp4?static=true";
+                m.name = jo.getString("name");
+                m.startPositionTicks = jo.getLong("startPositionTicks");
+                mediaList.add(m);
+            }
+        } catch (Exception e) {
+            Log.d(TAG, "loadPlayer: 异常" + e.toString());
+        }
+        if(mediaList.size() > 0 ){
+            initPlayer();
+        }else{
+            finish();
+        }
     }
-
-    public Player(@NonNull Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
-    }
-
-    public Player(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public Player(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-    }
-
 
     private void setPlayerListener() {
         player.setEventListener(new MediaPlayer.EventListener() {
@@ -176,24 +175,24 @@ public class Player extends VLCVideoLayout implements View.OnClickListener, Seek
         });
     }
 
-    private void initView(View view) {
-        vlcOut = this;
-        layout_bottom = view.findViewById(R.id.layout_bottom);
-        mStopBtn = view.findViewById(R.id.tv_stop);
-        mPauseBtn = view.findViewById(R.id.play_pause);
-        mSubtitleBtn = view.findViewById(R.id.tv_subtrack);
-        mAudioBtn = view.findViewById(R.id.tv_audiotrack);
-        mAspect = view.findViewById(R.id.tv_aspect);
-        mSpeed = view.findViewById(R.id.tv_speed);
-        mNext = view.findViewById(R.id.tv_next);
-        mPrevious = view.findViewById(R.id.tv_previous);
-        mSubject = view.findViewById(R.id.tv_subject);
-        mLoadingBar = view.findViewById(R.id.pb_loading);
-        mPauseImage = view.findViewById(R.id.pauseImage);
-        mSeekBar = view.findViewById(R.id.bottom_seek_progress);
+    private void initPlayer() {
+        vlcOut = findViewById(R.id.vlcVideoLayout);
+        layout_bottom = findViewById(R.id.layout_bottom);
+        mStopBtn = findViewById(R.id.tv_stop);
+        mPauseBtn = findViewById(R.id.play_pause);
+        mSubtitleBtn = findViewById(R.id.tv_subtrack);
+        mAudioBtn = findViewById(R.id.tv_audiotrack);
+        mAspect = findViewById(R.id.tv_aspect);
+        mSpeed = findViewById(R.id.tv_speed);
+        mNext = findViewById(R.id.tv_next);
+        mPrevious = findViewById(R.id.tv_previous);
+        mSubject = findViewById(R.id.tv_subject);
+        mLoadingBar = findViewById(R.id.pb_loading);
+        mPauseImage = findViewById(R.id.pauseImage);
+        mSeekBar = findViewById(R.id.bottom_seek_progress);
         mSeekBar.setMax(1000);
-        mEndTime = view.findViewById(R.id.total);
-        mCurrentTime = view.findViewById(R.id.current);
+        mEndTime = findViewById(R.id.total);
+        mCurrentTime = findViewById(R.id.current);
 
         mSeekBar.setOnSeekBarChangeListener(this);
         mStopBtn.setOnClickListener(this);
@@ -206,7 +205,7 @@ public class Player extends VLCVideoLayout implements View.OnClickListener, Seek
         mPrevious.setOnClickListener(this);
         mSubject.setOnClickListener(this);
 
-        libVLC = new LibVLC(getContext(), null);
+        libVLC = new LibVLC(this, null);
         player = new MediaPlayer(libVLC);
         player.attachViews(vlcOut, null, true, false);
         setPlayerListener();
@@ -216,9 +215,9 @@ public class Player extends VLCVideoLayout implements View.OnClickListener, Seek
 
     private PopupMenu CreatePopupMenu(View pview){
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-            return new PopupMenu(context, pview, Gravity.CENTER);
+            return new PopupMenu(this, pview, Gravity.CENTER);
         } else {
-            return new PopupMenu(context, pview);
+            return new PopupMenu(this, pview);
         }
     }
 
@@ -327,7 +326,7 @@ public class Player extends VLCVideoLayout implements View.OnClickListener, Seek
                             !player.isPlaying(),
                             currentPostion,
                             accessToken
-                            );
+                    );
                 }
             },10000,10000);
         }
@@ -350,7 +349,7 @@ public class Player extends VLCVideoLayout implements View.OnClickListener, Seek
         if(progressTime != null) progressTime.cancel();
         player.release();
         libVLC.release();
-        ((ViewGroup)getParent()).removeView(this);
+        this.finish();
     }
 
     @Override
@@ -404,7 +403,8 @@ public class Player extends VLCVideoLayout implements View.OnClickListener, Seek
 
     }
 
-    public boolean onKeyDown(int keyCode, KeyEvent event){
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
         if(!isShowing){
             switch (keyCode) {
                 case KeyEvent.KEYCODE_DPAD_UP:
@@ -425,7 +425,7 @@ public class Player extends VLCVideoLayout implements View.OnClickListener, Seek
                 case KeyEvent.KEYCODE_BACK:
                     release();
                     return true;
-                    //退出
+                //退出
             }
         }else {
             switch (keyCode){
@@ -435,6 +435,6 @@ public class Player extends VLCVideoLayout implements View.OnClickListener, Seek
                     return true;
             }
         }
-        return false;
+        return super.onKeyDown(keyCode, event);
     }
 }
