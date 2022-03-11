@@ -560,7 +560,7 @@ window.addEventListener('message', function (msg) {
             contentFrame.src = '';
             break;
         case 'AppHost.exit':
-            window.ExternalPlayer.appExit();
+            window.NativePlayer.appExit();
             break;
     }
 });

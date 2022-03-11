@@ -280,7 +280,12 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
         progressTime.schedule(new TimerTask() {
             @Override
             public void run() {
-                setProgress();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        setProgress();
+                    }
+                });
             }
         },1000,1000);
     }
