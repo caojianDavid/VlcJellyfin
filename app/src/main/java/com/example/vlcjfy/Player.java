@@ -62,6 +62,8 @@ public class Player extends VLCVideoLayout implements View.OnClickListener, Seek
     private Timer progressTime = null;
     private Timer reportPlayBackTime = null;
 
+    private JYFPlayerListener jyfPlayerListener = null;
+
     public Player(Context context,
                   String baseUrl,
                   String accessToken,
@@ -94,6 +96,9 @@ public class Player extends VLCVideoLayout implements View.OnClickListener, Seek
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
+    public void setJyfPlayerListener(JYFPlayerListener jyfPlayerListener){
+        this.jyfPlayerListener = jyfPlayerListener;
+    }
 
     private void setPlayerListener() {
         player.setEventListener(new MediaPlayer.EventListener() {
@@ -339,6 +344,9 @@ public class Player extends VLCVideoLayout implements View.OnClickListener, Seek
                 currentPostion,
                 accessToken
         );
+        if(jyfPlayerListener != null){
+            jyfPlayerListener.onPlayStop();
+        }
     }
 
     public void release() {
@@ -346,7 +354,9 @@ public class Player extends VLCVideoLayout implements View.OnClickListener, Seek
         if (progressTime != null) progressTime.cancel();
         player.release();
         libVLC.release();
-        ((ViewGroup) getParent()).removeView(this);
+        if(jyfPlayerListener != null){
+            jyfPlayerListener.onPlayRelease();
+        }
     }
 
     @Override
