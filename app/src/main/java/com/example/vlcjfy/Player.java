@@ -54,8 +54,8 @@ public class Player extends VLCVideoLayout implements View.OnClickListener, Seek
     public int PlayerState = PlaybackState.STATE_NONE;
     public boolean isShowing = false;
 
-    public String baseUrl = "" ,accessToken = "";
-    public ArrayList<JYFMediaItem> mediaList = null;
+    public String baseUrl = "", accessToken = "";
+    public JYFMediaItem mediaItem = null;
     public int currentItemIndex = 0;
     public long currentPostion = 0;
 
@@ -66,14 +66,14 @@ public class Player extends VLCVideoLayout implements View.OnClickListener, Seek
                   String baseUrl,
                   String accessToken,
                   int startIndex,
-                  ArrayList<JYFMediaItem> mediaList) {
+                  JYFMediaItem mediaItem) {
         super(context);
         this.context = context;
         this.baseUrl = baseUrl;
         this.accessToken = accessToken;
         this.currentItemIndex = startIndex;
-        this.mediaList = mediaList;
-        View view = inflate(context,R.layout.player_control_view,this);
+        this.mediaItem = mediaItem;
+        View view = inflate(context, R.layout.player_control_view, this);
         initView(view);
     }
 
@@ -99,17 +99,17 @@ public class Player extends VLCVideoLayout implements View.OnClickListener, Seek
         player.setEventListener(new MediaPlayer.EventListener() {
             @Override
             public void onEvent(MediaPlayer.Event event) {
-                switch (event.type){
+                switch (event.type) {
                     case MediaPlayer.Event.Opening:  //媒体打开
                         PlayerState = PlaybackState.STATE_STOPPED;
                         break;
                     case MediaPlayer.Event.Buffering: //媒体加载public float getBuffering() 获取加载视频流的进度0-100
                         int Buffering = (int) event.getBuffering();
                         PlayerState = PlaybackState.STATE_BUFFERING;
-                        if(Buffering < 100){
+                        if (Buffering < 100) {
                             mLoadingBar.setVisibility(View.VISIBLE);
                             mLoadingBar.setProgress(Buffering);
-                        }else{
+                        } else {
                             mLoadingBar.setVisibility(View.GONE);
                         }
                         break;
@@ -126,15 +126,6 @@ public class Player extends VLCVideoLayout implements View.OnClickListener, Seek
                         break;
                     case MediaPlayer.Event.Stopped://媒体结束、中断
                         Log.d(TAG, "onEvent: 播放结束！");
-                        reportPlayBackTime.cancel();  //取消进度报告
-                        reportPlayBackTime = null;
-                        PlayerState = PlaybackState.STATE_STOPPED;
-                        ReportPlayback.ReportPlaybackStop(      //报告状态结束
-                                baseUrl,
-                                mediaList.get(currentItemIndex).Id,
-                                event.getTimeChanged(),
-                                accessToken
-                        );
                         PlayStop();
                         break;
                     case MediaPlayer.Event.EndReached://媒体播放结束
@@ -211,10 +202,10 @@ public class Player extends VLCVideoLayout implements View.OnClickListener, Seek
         player.attachViews(vlcOut, null, true, false);
         setPlayerListener();
 
-        PlayStart(currentItemIndex);
+        PlayStart();
     }
 
-    private PopupMenu CreatePopupMenu(View pview){
+    private PopupMenu CreatePopupMenu(View pview) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
             return new PopupMenu(context, pview, Gravity.CENTER);
         } else {
@@ -226,7 +217,7 @@ public class Player extends VLCVideoLayout implements View.OnClickListener, Seek
     public void showPopupMenu(View pview, ArrayList list, int type) {
         PopupMenu popupMenu = CreatePopupMenu(pview);
         for (int i = 0; i < list.size(); i++) {
-            popupMenu.getMenu().add(type, i,i, String.valueOf(list.get(i)));
+            popupMenu.getMenu().add(type, i, i, String.valueOf(list.get(i)));
         }
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
@@ -251,11 +242,11 @@ public class Player extends VLCVideoLayout implements View.OnClickListener, Seek
 
     // type 3:音轨，4：字幕
     public void showPopupMenu(View pview, MediaPlayer.TrackDescription[] tracks, int type) {
-        if(tracks == null) return;
+        if (tracks == null) return;
         PopupMenu popupMenu = CreatePopupMenu(pview);
         for (int i = 0; i < tracks.length; i++) {
             MediaPlayer.TrackDescription track = tracks[i];
-            popupMenu.getMenu().add(type, track.id,i, track.name);
+            popupMenu.getMenu().add(type, track.id, i, track.name);
         }
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
@@ -274,7 +265,7 @@ public class Player extends VLCVideoLayout implements View.OnClickListener, Seek
         popupMenu.show();
     }
 
-    public void ShowController(){
+    public void ShowController() {
         layout_bottom.setVisibility(View.VISIBLE);
         isShowing = true;
         progressTime = new Timer();
@@ -283,11 +274,11 @@ public class Player extends VLCVideoLayout implements View.OnClickListener, Seek
             public void run() {
                 setProgress();
             }
-        },1000,1000);
+        }, 1000, 1000);
     }
 
-    public void HideController(){
-        if(progressTime != null){
+    public void HideController() {
+        if (progressTime != null) {
             progressTime.cancel();
             progressTime = null;
         }
@@ -308,49 +299,54 @@ public class Player extends VLCVideoLayout implements View.OnClickListener, Seek
         }
     }
 
-    public void PlayStart(int mediaListIndex) {
-        if(mediaListIndex >= 0 && mediaListIndex < mediaList.size()) {
-            currentItemIndex = mediaListIndex;
-            Uri uri = Uri.parse(mediaList.get(mediaListIndex).url);
-            Media media = new Media(libVLC, uri);
-            player.setMedia(media);
-            media.release();
-            //player.setTime(mediaList.get(mediaListIndex).startPositionTicks / 10000);
-            player.play();
+    public void PlayStart() {
+        Uri uri = Uri.parse(mediaItem.url);
+        Media media = new Media(libVLC, uri);
+        player.setMedia(media);
+        media.release();
+        //player.setTime(mediaList.get(mediaListIndex).startPositionTicks / 10000);
+        player.play();
 
-            reportPlayBackTime = new Timer();
-            reportPlayBackTime.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    ReportPlayback.ReportPlaybackProgress(baseUrl,
-                            mediaList.get(currentItemIndex).Id,
-                            !player.isPlaying(),
-                            currentPostion,
-                            accessToken
-                            );
-                }
-            },10000,10000);
-        }
+        reportPlayBackTime = new Timer();
+        reportPlayBackTime.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                ReportPlayback.ReportPlaybackProgress(baseUrl,
+                        mediaItem.Id,
+                        PlayerState == PlaybackState.STATE_PLAYING ? true : false,
+                        currentPostion,
+                        accessToken
+                );
+            }
+        }, 10000, 10000);
     }
 
-    public void play(){
-        if(player.isPlaying()){
+    public void play() {
+        if (player.isPlaying()) {
             player.pause();
-        }else{
+        } else {
             player.play();
         }
     }
 
-    public void PlayStop(){
-        PlayStart(currentItemIndex + 1);
+    public void PlayStop() {
+        reportPlayBackTime.cancel();  //取消进度报告
+        reportPlayBackTime = null;
+        PlayerState = PlaybackState.STATE_STOPPED;
+        ReportPlayback.ReportPlaybackStop(      //报告状态结束
+                baseUrl,
+                mediaItem.Id,
+                currentPostion,
+                accessToken
+        );
     }
 
-    public void release(){
-        if(reportPlayBackTime != null) reportPlayBackTime.cancel();
-        if(progressTime != null) progressTime.cancel();
+    public void release() {
+        if (reportPlayBackTime != null) reportPlayBackTime.cancel();
+        if (progressTime != null) progressTime.cancel();
         player.release();
         libVLC.release();
-        ((ViewGroup)getParent()).removeView(this);
+        ((ViewGroup) getParent()).removeView(this);
     }
 
     @Override
@@ -364,23 +360,21 @@ public class Player extends VLCVideoLayout implements View.OnClickListener, Seek
                 break;
             case R.id.tv_next:
                 player.stop();
-                PlayStart(currentItemIndex + 1);
                 break;
             case R.id.tv_previous:
                 player.stop();
-                PlayStart(currentItemIndex -1);
                 break;
             case R.id.tv_subtrack:
-                showPopupMenu(view, player.getSpuTracks(),4);
+                showPopupMenu(view, player.getSpuTracks(), 4);
                 break;
             case R.id.tv_audiotrack:
-                showPopupMenu(view, player.getAudioTracks(),3);
+                showPopupMenu(view, player.getAudioTracks(), 3);
                 break;
             case R.id.tv_aspect:
-                showPopupMenu(view,new ArrayList<String>(Arrays.asList(Aspects)),2);
+                showPopupMenu(view, new ArrayList<String>(Arrays.asList(Aspects)), 2);
                 break;
             case R.id.tv_speed:
-                showPopupMenu(view,new ArrayList<Float>(Arrays.asList(rates)),1);
+                showPopupMenu(view, new ArrayList<Float>(Arrays.asList(rates)), 1);
                 break;
         }
     }
@@ -404,8 +398,8 @@ public class Player extends VLCVideoLayout implements View.OnClickListener, Seek
 
     }
 
-    public boolean onKeyDown(int keyCode, KeyEvent event){
-        if(!isShowing){
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (!isShowing) {
             switch (keyCode) {
                 case KeyEvent.KEYCODE_DPAD_UP:
                 case KeyEvent.KEYCODE_DPAD_DOWN:
@@ -425,10 +419,10 @@ public class Player extends VLCVideoLayout implements View.OnClickListener, Seek
                 case KeyEvent.KEYCODE_BACK:
                     release();
                     return true;
-                    //退出
+                //退出
             }
-        }else {
-            switch (keyCode){
+        } else {
+            switch (keyCode) {
                 case KeyEvent.KEYCODE_ESCAPE:
                 case KeyEvent.KEYCODE_BACK:
                     HideController();
