@@ -48,18 +48,18 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
     private SeekBar mSeekBar;
     private ProgressBar mLoadingBar;
     private ImageView mPauseImage;
-    private TextView mEndTime, mCurrentTime;
+    private TextView mEndTime, mCurrentTime, mTitle;
 
     public int PlayerState = PlaybackState.STATE_NONE;
     public boolean isShowing = false;
 
-    public String baseUrl = "" ,accessToken = "";
+    public String baseUrl = "", accessToken = "";
     public ArrayList<JYFMediaItem> mediaList = null;
     public int currentItemIndex = 0;
     public long currentPostion = 0;
+    public int TimeInterval = 0;
 
     private Timer progressTime = null;
-    private Timer reportPlayBackTime = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,7 +69,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
         Intent intent = getIntent();
         this.baseUrl = intent.getStringExtra("baseUrl");
         this.accessToken = intent.getStringExtra("accessToken");
-        this.currentItemIndex = intent.getIntExtra("startIndex",0);
+        this.currentItemIndex = intent.getIntExtra("startIndex", 0);
         String options = intent.getStringExtra("options");
         mediaList = new ArrayList<>();
         try {
@@ -79,7 +79,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
                 JSONObject jo = js.getJSONObject(i);
                 JYFMediaItem m = new JYFMediaItem();
                 m.Id = jo.getString("id");
-                m.url = baseUrl + "/videos/"+m.Id+"/stream.mp4?static=true";
+                m.url = baseUrl + "/videos/" + m.Id + "/stream.mp4?static=true";
                 m.name = jo.getString("name");
                 m.startPositionTicks = jo.getLong("startPositionTicks");
                 mediaList.add(m);
@@ -87,9 +87,9 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
         } catch (Exception e) {
             Log.d(TAG, "loadPlayer: 异常" + e.toString());
         }
-        if(mediaList.size() > 0 ){
+        if (mediaList.size() > 0) {
             initPlayer();
-        }else{
+        } else {
             finish();
         }
     }
@@ -98,17 +98,17 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
         player.setEventListener(new MediaPlayer.EventListener() {
             @Override
             public void onEvent(MediaPlayer.Event event) {
-                switch (event.type){
+                switch (event.type) {
                     case MediaPlayer.Event.Opening:  //媒体打开
                         PlayerState = PlaybackState.STATE_STOPPED;
                         break;
                     case MediaPlayer.Event.Buffering: //媒体加载public float getBuffering() 获取加载视频流的进度0-100
                         int Buffering = (int) event.getBuffering();
                         PlayerState = PlaybackState.STATE_BUFFERING;
-                        if(Buffering < 100){
+                        if (Buffering < 100) {
                             mLoadingBar.setVisibility(View.VISIBLE);
                             mLoadingBar.setProgress(Buffering);
-                        }else{
+                        } else {
                             mLoadingBar.setVisibility(View.GONE);
                         }
                         break;
@@ -134,7 +134,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
                         Log.d(TAG, "onEvent: EncounteredError");
                         break;
                     case MediaPlayer.Event.TimeChanged://视频时间变化
-                        currentPostion = event.getTimeChanged();
+                        PlayPostionChenged(event.getTimeChanged());
                         break;
                     case MediaPlayer.Event.PositionChanged://视频总时长的百分比
                         break;
@@ -184,7 +184,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
         mSeekBar.setMax(1000);
         mEndTime = findViewById(R.id.total);
         mCurrentTime = findViewById(R.id.current);
-
+        mTitle = findViewById(R.id.title);
         mSeekBar.setOnSeekBarChangeListener(this);
         mStopBtn.setOnClickListener(this);
         mPauseBtn.setOnClickListener(this);
@@ -204,7 +204,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
         PlayStart(currentItemIndex);
     }
 
-    private PopupMenu CreatePopupMenu(View pview){
+    private PopupMenu CreatePopupMenu(View pview) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
             return new PopupMenu(this, pview, Gravity.CENTER);
         } else {
@@ -216,7 +216,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
     public void showPopupMenu(View pview, ArrayList list, int type) {
         PopupMenu popupMenu = CreatePopupMenu(pview);
         for (int i = 0; i < list.size(); i++) {
-            popupMenu.getMenu().add(type, i,i, String.valueOf(list.get(i)));
+            popupMenu.getMenu().add(type, i, i, String.valueOf(list.get(i)));
         }
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
@@ -241,11 +241,11 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
 
     // type 3:音轨，4：字幕
     public void showPopupMenu(View pview, MediaPlayer.TrackDescription[] tracks, int type) {
-        if(tracks == null) return;
+        if (tracks == null) return;
         PopupMenu popupMenu = CreatePopupMenu(pview);
         for (int i = 0; i < tracks.length; i++) {
             MediaPlayer.TrackDescription track = tracks[i];
-            popupMenu.getMenu().add(type, track.id,i, track.name);
+            popupMenu.getMenu().add(type, track.id, i, track.name);
         }
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
@@ -264,7 +264,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
         popupMenu.show();
     }
 
-    public void ShowController(){
+    public void ShowController() {
         layout_bottom.setVisibility(View.VISIBLE);
         isShowing = true;
         progressTime = new Timer();
@@ -278,11 +278,11 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
                     }
                 });
             }
-        },1000,1000);
+        }, 1000, 1000);
     }
 
-    public void HideController(){
-        if(progressTime != null){
+    public void HideController() {
+        if (progressTime != null) {
             progressTime.cancel();
             progressTime = null;
         }
@@ -304,7 +304,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     public void PlayStart(int mediaListIndex) {
-        if(mediaListIndex >= 0 && mediaListIndex < mediaList.size()) {
+        if (mediaListIndex >= 0 && mediaListIndex < mediaList.size()) {
             currentItemIndex = mediaListIndex;
             Uri uri = Uri.parse(mediaList.get(mediaListIndex).url);
             Media media = new Media(libVLC, uri);
@@ -312,33 +312,38 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
             media.release();
             //player.setTime(mediaList.get(mediaListIndex).startPositionTicks / 10000);
             player.play();
-
-            reportPlayBackTime = new Timer();
-            reportPlayBackTime.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    ReportPlayback.ReportPlaybackProgress(baseUrl,
-                            mediaList.get(currentItemIndex).Id,
-                            !player.isPlaying(),
-                            currentPostion,
-                            accessToken
-                    );
-                }
-            },10000,10000);
+            mTitle.setText(mediaListIndex + " : " + mediaList.get(mediaListIndex).name);
         }
     }
 
-    public void play(){
-        if(player.isPlaying()){
+    public void play() {
+        if (player.isPlaying()) {
             player.pause();
-        }else{
+        } else {
             player.play();
         }
     }
 
-    public void PlayStop(){
-        reportPlayBackTime.cancel();  //取消进度报告
-        reportPlayBackTime = null;
+    public void PlayPostionChenged(long postion) {
+        currentPostion = postion;
+        TimeInterval += 1;
+        if (TimeInterval > 30) {
+            TimeInterval = 0;
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    ReportPlayback.ReportPlaybackProgress(baseUrl,
+                            mediaList.get(currentItemIndex).Id,
+                            false,
+                            currentPostion,
+                            accessToken
+                    );
+                }
+            }).start();
+        }
+    }
+
+    public void PlayStop() {
         PlayerState = PlaybackState.STATE_STOPPED;
         new Thread(new Runnable() {
             @Override
@@ -351,12 +356,14 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
                 );
             }
         }).start();
-        PlayStart(currentItemIndex + 1);
+        //PlayStart(currentItemIndex + 1);
     }
 
-    public void release(){
-        if(reportPlayBackTime != null) reportPlayBackTime.cancel();
-        if(progressTime != null) progressTime.cancel();
+    public void release() {
+        if (progressTime != null) {
+            Log.d(TAG, "release: 退出进度条定时");
+            progressTime.cancel();
+        }
         player.release();
         libVLC.release();
         this.finish();
@@ -377,19 +384,19 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
                 break;
             case R.id.tv_previous:
                 player.stop();
-                PlayStart(currentItemIndex -1);
+                PlayStart(currentItemIndex - 1);
                 break;
             case R.id.tv_subtrack:
-                showPopupMenu(view, player.getSpuTracks(),4);
+                showPopupMenu(view, player.getSpuTracks(), 4);
                 break;
             case R.id.tv_audiotrack:
-                showPopupMenu(view, player.getAudioTracks(),3);
+                showPopupMenu(view, player.getAudioTracks(), 3);
                 break;
             case R.id.tv_aspect:
-                showPopupMenu(view,new ArrayList<String>(Arrays.asList(Aspects)),2);
+                showPopupMenu(view, new ArrayList<String>(Arrays.asList(Aspects)), 2);
                 break;
             case R.id.tv_speed:
-                showPopupMenu(view,new ArrayList<Float>(Arrays.asList(rates)),1);
+                showPopupMenu(view, new ArrayList<Float>(Arrays.asList(rates)), 1);
                 break;
         }
     }
@@ -415,7 +422,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if(!isShowing){
+        if (!isShowing) {
             switch (keyCode) {
                 case KeyEvent.KEYCODE_DPAD_UP:
                 case KeyEvent.KEYCODE_DPAD_DOWN:
@@ -437,8 +444,8 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
                     return true;
                 //退出
             }
-        }else {
-            switch (keyCode){
+        } else {
+            switch (keyCode) {
                 case KeyEvent.KEYCODE_ESCAPE:
                 case KeyEvent.KEYCODE_BACK:
                     HideController();
