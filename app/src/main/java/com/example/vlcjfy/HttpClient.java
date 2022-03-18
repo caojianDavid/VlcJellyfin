@@ -28,6 +28,7 @@ public class HttpClient {
     public static String x_emby_authorization = "MediaBrowser Client=\"Jellyfin for VLCPlayer\", Device=\"VLCPlayer\", DeviceId=\"TW96aWxsYS81LjAgKFdpbmRvd3MgTlQgMTAuMDsgV09XNjQpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIENocm9tZS81My4wLjI3ODUuMTEzIFNhZmFyaS81MzcuMzZ8MTY0NTg1MTM5NDg3Ng11\", Version=\"0.0.1\", Token=\"%s\"";
 
     public static String doPost(String urlStr, String json,String token) throws IOException {
+        Log.d(TAG, "doPost: " + urlStr);
         String result = "";
         URL url = new URL(urlStr);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();

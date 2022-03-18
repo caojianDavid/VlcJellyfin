@@ -59,6 +59,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
     public long currentPostion = 0;
     public int TimeInterval = 0;
 
+    private Boolean AutoPlayNextItem = true;
     private Timer progressTime = null;
 
     @Override
@@ -125,7 +126,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
                         break;
                     case MediaPlayer.Event.Stopped://媒体结束、中断
                         Log.d(TAG, "onEvent: 播放结束！");
-                        PlayStop(true);
+                        PlayStop();
                         break;
                     case MediaPlayer.Event.EndReached://媒体播放结束
                         Log.d(TAG, "onEvent: EndReached");
@@ -313,6 +314,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
             //player.setTime(mediaList.get(mediaListIndex).startPositionTicks / 10000);
             player.play();
             mTitle.setText(mediaListIndex + " : " + mediaList.get(mediaListIndex).name);
+            AutoPlayNextItem = true;
         }
     }
 
@@ -343,7 +345,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
         }
     }
 
-    public void PlayStop(Boolean PlayNextItem) {
+    public void PlayStop() {
         PlayerState = PlaybackState.STATE_STOPPED;
         new Thread(new Runnable() {
             @Override
@@ -356,10 +358,8 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
                 );
             }
         }).start();
-        if(PlayNextItem){
+        if(AutoPlayNextItem){
             PlayStart(currentItemIndex + 1);
-        }else {
-            release();
         }
     }
 
@@ -379,13 +379,16 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
                 play();
                 break;
             case R.id.tv_stop:
-                PlayStop(false);
+                AutoPlayNextItem = false;
+                player.stop();
+                release();
                 break;
             case R.id.tv_next:
-                PlayStop(true);
-                PlayStart(currentItemIndex + 1);
+                AutoPlayNextItem = true;
+                player.stop();
                 break;
             case R.id.tv_previous:
+                AutoPlayNextItem = false;
                 player.stop();
                 PlayStart(currentItemIndex - 1);
                 break;
