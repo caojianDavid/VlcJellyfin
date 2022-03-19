@@ -59,7 +59,6 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
     public long currentPostion = 0;
     public int TimeInterval = 0;
 
-    private Boolean AutoPlayNextItem = true;
     private Timer progressTime = null;
 
     @Override
@@ -126,7 +125,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
                         break;
                     case MediaPlayer.Event.Stopped://媒体结束、中断
                         Log.d(TAG, "onEvent: 播放结束！");
-                        PlayStop();
+                        PlayStop(1);
                         break;
                     case MediaPlayer.Event.EndReached://媒体播放结束
                         Log.d(TAG, "onEvent: EndReached");
@@ -314,7 +313,6 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
             //player.setTime(mediaList.get(mediaListIndex).startPositionTicks / 10000);
             player.play();
             mTitle.setText(mediaListIndex + " : " + mediaList.get(mediaListIndex).name);
-            AutoPlayNextItem = true;
         }
     }
 
@@ -345,7 +343,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
         }
     }
 
-    public void PlayStop() {
+    public void PlayStop(int next) {
         PlayerState = PlaybackState.STATE_STOPPED;
         new Thread(new Runnable() {
             @Override
@@ -358,8 +356,12 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
                 );
             }
         }).start();
-        if(AutoPlayNextItem){
+        if(next == 0){
+            release();
+        }else if(next == 1){
             PlayStart(currentItemIndex + 1);
+        }else if(next == 2){
+            PlayStart(currentItemIndex - 1);
         }
     }
 
@@ -379,18 +381,13 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
                 play();
                 break;
             case R.id.tv_stop:
-                AutoPlayNextItem = false;
-                player.stop();
-                release();
+                PlayStop(0);
                 break;
             case R.id.tv_next:
-                AutoPlayNextItem = true;
-                player.stop();
+                PlayStop(1);
                 break;
             case R.id.tv_previous:
-                AutoPlayNextItem = false;
-                player.stop();
-                PlayStart(currentItemIndex - 1);
+                PlayStop(2);
                 break;
             case R.id.tv_subtrack:
                 showPopupMenu(view, player.getSpuTracks(), 4);
@@ -446,7 +443,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
                     return true;
                 case KeyEvent.KEYCODE_ESCAPE:
                 case KeyEvent.KEYCODE_BACK:
-                    release();
+                    PlayStop(0);
                     return true;
                 //退出
             }
