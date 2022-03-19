@@ -3,6 +3,8 @@ package com.example.vlcjfy;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -39,10 +41,6 @@ import java.util.ArrayList;
 public class MainActivity extends XWalkActivity {
     private String TAG = "XWalkActivity";
     private myXWalkView xwalkView;
-    private Player player;
-//     private VLCPlayer player;
-//     private VideoController Controller;
-//     private NativePlayer nativePlayer;
 
     @Override
     protected void onXWalkReady() {
@@ -52,14 +50,14 @@ public class MainActivity extends XWalkActivity {
                 Uri uri = request.getUrl();
                 String path = uri.getPath();
                 //Log.d(TAG, "shouldInterceptLoadRequest: console :" + path);
-                if(path.endsWith("exoplayer.js")){
+                if (path.endsWith("exoplayer.js")) {
                     InputStream is = null;
                     try {
                         is = getAssets().open("frontend/js/exoplayer.js");
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    XWalkWebResourceResponse xwrr = createXWalkWebResourceResponse("text/javascript","UTF-8",is);
+                    XWalkWebResourceResponse xwrr = createXWalkWebResourceResponse("text/javascript", "UTF-8", is);
                     return xwrr;
                 }
                 return super.shouldInterceptLoadRequest(view, request);
@@ -76,8 +74,6 @@ public class MainActivity extends XWalkActivity {
         settings.setAllowFileAccessFromFileURLs(true);
         settings.setAllowUniversalAccessFromFileURLs(true);
 
-        //nativePlayer = new NativePlayer(this);
-        //xwalkView.addJavascriptInterface(nativePlayer,"NativePlayer");
         xwalkView.addJavascriptInterface(new VLCCallBack(), "NativePlayer");
         String url = "file:///android_asset/frontend/index.html";
         xwalkView.loadUrl(url);
@@ -93,147 +89,43 @@ public class MainActivity extends XWalkActivity {
         //XWalkPreferences.setValue(XWalkPreferences.REMOTE_DEBUGGING, true);
     }
 
+    @Override
+    public void onBackPressed() {
+        xwalkView.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ESCAPE));
+        //super.onBackPressed();
+    }
+
     public class VLCCallBack {
 
         @JavascriptInterface
-        public void loadPlayer(String baseUrl,String accessToken,int startIndex,String options) {
-            Intent intent = new Intent(MainActivity.this,PlayerActivity.class);
-            intent.putExtra("baseUrl",baseUrl);
-            intent.putExtra("accessToken",accessToken);
-            intent.putExtra("startIndex",accessToken);
-            intent.putExtra("options",options);
+        public void loadPlayer(String baseUrl, String accessToken, int startIndex, String options) {
+            Intent intent = new Intent(MainActivity.this, PlayerActivity.class);
+            intent.putExtra("baseUrl", baseUrl);
+            intent.putExtra("accessToken", accessToken);
+            intent.putExtra("startIndex", accessToken);
+            intent.putExtra("options", options);
             startActivity(intent);
-//            ArrayList<JYFMediaItem> medialist = new ArrayList<>();
-//            try {
-//                JSONObject mediaSource = new JSONObject(args);
-//                JSONArray js = mediaSource.getJSONArray("items");
-//                for (int i = 0; i < js.length(); i++) {
-//                    JSONObject jo = js.getJSONObject(i);
-//                    JYFMediaItem m = new JYFMediaItem();
-//                    m.Id = jo.getString("id");
-//                    m.url = baseUrl + "/videos/"+m.Id+"/stream.mp4?static=true";
-//                    m.name = jo.getString("name");
-//                    m.startPositionTicks = jo.getLong("startPositionTicks");
-//                    medialist.add(m);
-//                }
-//            } catch (Exception e) {
-//                Log.d(TAG, "loadPlayer: 异常" + e.toString());
-//            }
-//            if(medialist.size() > 0 ){
-//                runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        xwalkView.setVisibility(View.GONE);
-//                        player = new Player(MainActivity.this,baseUrl,accessToken,startIndex,medialist);
-//                        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-//                        addContentView(player,lp);
-//                    }
-//                });
-//            }
         }
-        
-//         @JavascriptInterface
-//         public void toPlay(String videoUrl) {
-//             runOnUiThread(new Runnable() {
-//                 @Override
-//                 public void run() {
-//                     FrameLayout ParentView = ((FrameLayout) findViewById(R.id.paview));
-//                     player = new VLCPlayer(getApplicationContext());
-//                     player.setMedia(videoUrl);
-//                     player.setIVLCPlayer(new IVLCPlayer() {
-//                         @Override
-//                         public void onPlayEnd() {
-//                             Controller = null;
-//                             player.release();
-//                             ParentView.removeView(player);
-//                             player = null;
-//                             xwalkView.setVisibility(View.VISIBLE);
-//                             xwalkView.evaluateJavascript("javascript:window.postmsg('notifyCanceled','')",null);
-//                         }
-//                     });
-
-//                     FrameLayout.LayoutParams ll = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
-//                     ParentView.addView(player, ll);
-//                     Controller = new VideoController(getApplicationContext());
-//                     Controller.setPlayer(player);
-//                     player.setController(Controller);
-//                     player.start();
-
-//                     xwalkView.setVisibility(View.GONE);
-//                 }
-//             });
-//         }
 
         @JavascriptInterface
         public void appExit() {
-            Log.d(TAG, "appExit: 退出APP");
-            if (player != null) player.release();
-            System.exit(0);
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setMessage("确认退出？");
+            builder.setTitle("确认");
+            builder.setPositiveButton("退出", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                    System.exit(0);
+                }
+            });
+            builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+            builder.create().show();
         }
-
-//         @JavascriptInterface
-//         public String getPostion() {
-//             if (player != null) {
-//                 return String.valueOf(player.getCurrentPosition());
-//             } else {
-//                 return "0";
-//             }
-//         }
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        Log.d(TAG, "onKeyDown播放器按键按下：" + keyCode);
-        if(player != null){
-            return player.onKeyDown(keyCode,event);
-        }else{
-            if (xwalkView.getVisibility() == View.VISIBLE) {
-                xwalkView.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ESCAPE));
-                return true;
-            }
-        }
-//         if (nativePlayer.player != null) {
-//             int currPostion = nativePlayer.player.getCurrentPosition();
-//             if (!nativePlayer.Controller.isShowing()) {
-//                 switch (keyCode) {
-//                     case KeyEvent.KEYCODE_DPAD_UP:
-//                     case KeyEvent.KEYCODE_DPAD_DOWN:
-//                         nativePlayer.Controller.show();
-//                         return true;
-//                     case KeyEvent.KEYCODE_DPAD_RIGHT:
-//                         nativePlayer.player.seekTo(currPostion + (30 * 1000));
-//                         return true;
-//                     case KeyEvent.KEYCODE_DPAD_LEFT:
-//                         nativePlayer.player.seekTo(currPostion - (10 * 1000));
-//                         return true;
-//                     case KeyEvent.KEYCODE_ENTER:
-//                     case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-//                         nativePlayer.Controller.play();
-//                         return true;
-//                     case KeyEvent.KEYCODE_ESCAPE:
-//                     case KeyEvent.KEYCODE_BACK:
-//                         nativePlayer.Controller.stop();
-//                         return true;
-//                 }
-//             } else {
-//                 switch (keyCode) {
-//                     case KeyEvent.KEYCODE_ESCAPE:
-//                     case KeyEvent.KEYCODE_BACK:
-//                         nativePlayer.Controller.hide();
-//                         return true;
-//                 }
-//             }
-//             return super.onKeyDown(keyCode, event);
-//         } else {
-//             switch (keyCode) {
-//                 case KeyEvent.KEYCODE_ESCAPE:
-//                 case KeyEvent.KEYCODE_BACK:
-//                     if (xwalkView.getVisibility() == View.VISIBLE) {
-//                         xwalkView.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ESCAPE));
-//                     }
-//             }
-//             return true;
-//         }
-        return super.onKeyDown(keyCode, event);
     }
 }

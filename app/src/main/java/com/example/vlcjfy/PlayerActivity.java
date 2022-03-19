@@ -1,6 +1,7 @@
 package com.example.vlcjfy;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.menu.MenuBuilder;
 
 import android.content.Context;
 import android.content.Intent;
@@ -230,7 +231,6 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
             }
         });
         popupMenu.show();
-        popupMenu.getMenu().getItem(currentItemIndex).setChecked(true);
     }
 
     // type 1:播放速率，2:宽高比
@@ -289,6 +289,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
         layout_bottom.setVisibility(View.VISIBLE);
         isShowing = true;
         progressTime = new Timer();
+        mPauseBtn.requestFocus();
         progressTime.schedule(new TimerTask() {
             @Override
             public void run() {
