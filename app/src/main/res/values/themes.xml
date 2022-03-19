@@ -13,4 +13,22 @@
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
     </style>
+
+    <style name="myPopupMenuSty" parent="Theme.MaterialComponents.DayNight.DarkActionBar">         <!--主风格、mainStyle-->
+        <item name="android:dropDownListViewStyle">@style/popmenuDivier</item>
+        <item name="android:textAppearanceSmallPopupMenu">@style/popmenuText</item>
+        <item name="android:textAppearanceLargePopupMenu">@style/popmenuText</item>
+    </style>
+    <!--popmenu的字体颜色-->
+    <style name="popmenuText">
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">26sp</item>
+        <item name="android:gravity">center</item>
+    </style>
+    <!--popMenu分割线的颜色-->
+    <style name="popmenuDivier">
+        <item name="android:divider">@color/white</item>
+        <item name="android:dividerHeight">2sp</item>
+    </style>
+
 </resources>

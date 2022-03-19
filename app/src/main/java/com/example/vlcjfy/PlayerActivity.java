@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -212,6 +213,26 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
         }
     }
 
+    private void showSubJectMenu(View pview) {
+        PopupMenu popupMenu = CreatePopupMenu(pview);
+        for (int i = 0; i < mediaList.size(); i++) {
+            String menutext = i + 1 + ":" + mediaList.get(i).name;
+            popupMenu.getMenu().add(Menu.NONE, i, i, menutext);
+        }
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                int itemid = menuItem.getItemId();
+                if (itemid != currentItemIndex) {
+                    PlayStop(itemid + 100);
+                }
+                return true;
+            }
+        });
+        popupMenu.show();
+        popupMenu.getMenu().getItem(currentItemIndex).setChecked(true);
+    }
+
     // type 1:播放速率，2:宽高比
     public void showPopupMenu(View pview, ArrayList list, int type) {
         PopupMenu popupMenu = CreatePopupMenu(pview);
@@ -312,7 +333,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
             media.release();
             //player.setTime(mediaList.get(mediaListIndex).startPositionTicks / 10000);
             player.play();
-            mTitle.setText(mediaListIndex + " : " + mediaList.get(mediaListIndex).name);
+            mTitle.setText(mediaListIndex + 1 + " : " + mediaList.get(mediaListIndex).name);
         }
     }
 
@@ -356,12 +377,14 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
                 );
             }
         }).start();
-        if(next == 0){
+        if (next == 0) {
             release();
-        }else if(next == 1){
+        } else if (next == 1) {
             PlayStart(currentItemIndex + 1);
-        }else if(next == 2){
+        } else if (next == 2) {
             PlayStart(currentItemIndex - 1);
+        } else if (next > 99) {
+            PlayStart(next - 100);
         }
     }
 
@@ -400,6 +423,9 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
                 break;
             case R.id.tv_speed:
                 showPopupMenu(view, new ArrayList<Float>(Arrays.asList(rates)), 1);
+                break;
+            case R.id.tv_subject:
+                showSubJectMenu(view);
                 break;
         }
     }
