@@ -93,18 +93,18 @@
 
             <ImageView
                 android:id="@+id/tv_stop"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:layout_margin="30dp"
+                android:layout_width="@dimen/controllerbtn_width"
+                android:layout_height="@dimen/controllerbtn_height"
+                android:layout_margin="@dimen/controllerbtn_margin"
                 android:background="@drawable/controller_btn_background"
                 android:focusable="true"
                 android:src="@drawable/ic_baseline_stop_48" />
 
             <ImageView
                 android:id="@+id/play_pause"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:layout_margin="30dp"
+                android:layout_width="@dimen/controllerbtn_width"
+                android:layout_height="@dimen/controllerbtn_height"
+                android:layout_margin="@dimen/controllerbtn_margin"
                 android:background="@drawable/controller_btn_background"
                 android:focusable="true"
                 android:src="@drawable/ic_baseline_play_arrow_48" />
@@ -120,18 +120,18 @@
 
             <ImageView
                 android:id="@+id/tv_subtrack"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:layout_margin="30dp"
+                android:layout_width="@dimen/controllerbtn_width"
+                android:layout_height="@dimen/controllerbtn_height"
+                android:layout_margin="@dimen/controllerbtn_margin"
                 android:background="@drawable/controller_btn_background"
                 android:focusable="true"
                 android:src="@drawable/ic_baseline_subtitles_48" />
 
             <ImageView
                 android:id="@+id/tv_audiotrack"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:layout_margin="30dp"
+                android:layout_width="@dimen/controllerbtn_width"
+                android:layout_height="@dimen/controllerbtn_height"
+                android:layout_margin="@dimen/controllerbtn_margin"
                 android:background="@drawable/controller_btn_background"
                 android:focusable="true"
                 android:src="@drawable/ic_baseline_audiotrack_48" />
@@ -139,8 +139,8 @@
             <TextView
                 android:id="@+id/tv_aspect"
                 android:layout_width="wrap_content"
-                android:layout_height="80dp"
-                android:layout_margin="30dp"
+                android:layout_height="@dimen/controllerbtn_height"
+                android:layout_margin="@dimen/controllerbtn_margin"
                 android:gravity="center"
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp"
@@ -153,8 +153,8 @@
             <TextView
                 android:id="@+id/tv_speed"
                 android:layout_width="wrap_content"
-                android:layout_height="80dp"
-                android:layout_margin="30dp"
+                android:layout_height="@dimen/controllerbtn_height"
+                android:layout_margin="@dimen/controllerbtn_margin"
                 android:gravity="center"
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp"

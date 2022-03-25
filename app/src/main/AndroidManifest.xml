@@ -12,7 +12,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/jellyfin"
         android:supportsRtl="true"
-        android:theme="@style/Theme.VlcJfy">
+        android:theme="@style/Theme.AppCompat.NoActionBar">
         <activity
             android:name=".PlayerActivity"
             android:exported="false"
